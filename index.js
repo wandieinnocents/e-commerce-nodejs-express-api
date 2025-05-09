@@ -13,6 +13,10 @@ app.use(express.json());
 connectDB();
 
 // Routes
+app.get("/", (req, res) => {
+    res.send("API is running...");
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 
