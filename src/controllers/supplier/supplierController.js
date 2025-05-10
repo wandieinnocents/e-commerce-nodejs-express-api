@@ -1,34 +1,55 @@
 const Supplier = require('../../models/Supplier');
+const Joi = require('joi');
+
+
+// Schema validation
+const supplierSchema = Joi.object({
+    supplier_name: Joi.string().trim().required().messages({
+        'any.required': 'Supplier name is required',
+        'string.empty': 'Supplier name cannot be empty',
+    }),
+    /*
+    branch_status: Joi.number().integer().optional().messages({
+        'number.base': 'Branch status must be a number',
+    }),
+    */
+    supplier_phone: Joi.number().integer().optional().messages({
+        'number.required': 'Phone number is required',
+        'number.base': 'Phone number must be a number',
+        'number.empty': 'Phone number cannot be empty',
+    }),
+    branch_address: Joi.string().trim().optional(),
+    created_by: Joi.number().integer().optional().messages({
+        'number.base': 'Created by must be a number',
+    }),
+    updated_by: Joi.number().integer().optional().messages({
+        'number.base': 'Updated by must be a number',
+    }),
+}).strict().unknown(false);
+
 
 // create branch
 const createSupplier = async (req, res) => {
 
-    const {
-        supplier_code,
-        supplier_name,
-        supplier_email,
-        supplier_phone,
-        supplier_city,
-        supplier_address,
-        supplier_country,
-        supplier_organization,
-        supplier_status,
-        supplier_description,
-        supplier_website_url,
-        supplier_image,
-        created_by,
-        updated_by
-    } = req.body;
-
-    if (!supplier_name) {
-        return res.status(401).json({ message: "Supplier name is required" });
-    }
-
-    if (!supplier_phone) {
-        return res.status(401).json({ message: "Supplier phone number is required" });
-    }
 
     try {
+
+        const validatedData = await supplierSchema.validateAsync(req.body);
+        const {
+            supplier_name,
+            supplier_email,
+            supplier_phone,
+            supplier_city,
+            supplier_address,
+            supplier_country,
+            supplier_organization,
+            supplier_status,
+            supplier_description,
+            supplier_website_url,
+            supplier_image,
+            created_by,
+            updated_by
+        } = validatedData;
 
         // Check if supplier with the same phone or email already exists
         const existingSupplier = await Supplier.findOne({
