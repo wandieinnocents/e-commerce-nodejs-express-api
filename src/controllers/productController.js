@@ -1,8 +1,8 @@
 const Product = require("../models/Product");
 
 const createProduct = async (req, res) => {
-    const { title, description, category, img, quantity, price } = req.body;
-    if (!title || !description || !category || !img || !quantity || !price) {
+  const { title, description, category, img, quantity, price } = req.body;
+  if (!title || !description || !category || !img || !quantity || !price) {
     return res.status(401).json({ message: "All fields are required" });
   }
 
@@ -18,15 +18,15 @@ const createProduct = async (req, res) => {
 };
 
 const getAllProducts = async (req, res) => {
-      try {
-        const products = await Product.find();
-        res.status(200).json(products);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: error.message
-        });
-    }
+  try {
+    const products = await Product.find();
+    res.status(200).json(products);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: error.message
+    });
+  }
 };
 
 const getProductById = async (req, res) => {

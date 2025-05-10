@@ -2,19 +2,17 @@ const express = require("express");
 const {
     createBranch,
     getAllBranches,
-    //   getProductById,
-    //   updateProduct,
-    //   deleteProduct,
-    //   getByCategory
+    getBranchById,
+    updateBranch,
+    deleteBranch,
 } = require("../controllers/branchController");
 
 const router = express.Router();
 
 router.post("/", createBranch);
 router.get("/", getAllBranches);
-// router.get("/:id", getProductById);
-// router.put("/:id", updateProduct);
-// router.delete("/:id", deleteProduct);
-// router.get("/category/:category", getByCategory);
+router.get("/:id", getBranchById);
+router.put("/:id", updateBranch);
+router.delete("/:id", deleteBranch);
 
 module.exports = router;
