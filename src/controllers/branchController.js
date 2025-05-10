@@ -1,5 +1,6 @@
 const Branch = require('../models/Branch');
-const { branchValidationSchema } = require('../validations/branch/branchValidations');
+const { storeBranchValidation } = require('../validations/branch/branchValidations');
+const { updateBranchValidation } = require('../validations/branch/branchValidations');
 
 
 // create branch
@@ -7,7 +8,7 @@ const createBranch = async (req, res) => {
 
     try {
         // Validate input
-        const validatedData = await branchValidationSchema.validateAsync(req.body);
+        const validatedData = await storeBranchValidation.validateAsync(req.body);
         const { branch_name, branch_status, branch_address, created_by, updated_by } = validatedData;
 
         // Check if branch already exists
@@ -113,7 +114,7 @@ const getBranchById = async (req, res) => {
 const updateBranch = async (req, res) => {
     const { id } = req.params;
     try {
-        const validatedData = await branchValidationSchema.validateAsync(req.body);
+        const validatedData = await updateBranchValidation.validateAsync(req.body);
         const { branch_name, branch_status, branch_address, created_by, updated_by } = validatedData;
 
         // Update the branch
