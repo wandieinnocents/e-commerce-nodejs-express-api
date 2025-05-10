@@ -4,7 +4,7 @@ const supplierSchema = new mongoose.Schema(
     {
         supplier_code: { type: String, default: null, unique: true },
         supplier_name: { type: String, required: true },
-        supplier_email: { type: String, default: null },
+        supplier_email: { type: String, default: null, unique: true },
         supplier_phone: { type: String, required: true, unique: true },
         supplier_city: { type: String, default: null },
         supplier_address: { type: String, default: null },

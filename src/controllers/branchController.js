@@ -1,24 +1,5 @@
 const Branch = require('../models/Branch');
-const Joi = require('joi');
-
-
-// Schema validation
-const branchSchema = Joi.object({
-    branch_name: Joi.string().trim().required().messages({
-        'any.required': 'Branch name is required',
-        'string.empty': 'Branch name cannot be empty',
-    }),
-    branch_status: Joi.number().integer().optional().messages({
-        'number.base': 'Branch status must be a number',
-    }),
-    branch_address: Joi.string().trim().optional(),
-    created_by: Joi.number().integer().optional().messages({
-        'number.base': 'Created by must be a number',
-    }),
-    updated_by: Joi.number().integer().optional().messages({
-        'number.base': 'Updated by must be a number',
-    }),
-}).strict().unknown(false);
+const { branchValidationSchema } = require('../validations/branch/branchValidations');
 
 
 // create branch
@@ -26,7 +7,7 @@ const createBranch = async (req, res) => {
 
     try {
         // Validate input
-        const validatedData = await branchSchema.validateAsync(req.body);
+        const validatedData = await branchValidationSchema.validateAsync(req.body);
         const { branch_name, branch_status, branch_address, created_by, updated_by } = validatedData;
 
         // Check if branch already exists
@@ -131,10 +112,17 @@ const getBranchById = async (req, res) => {
 //update branch 
 const updateBranch = async (req, res) => {
     const { id } = req.params;
-    const { branch_code, branch_name, branch_status, branch_address, created_by, updated_by } = req.body;
     try {
+        const validatedData = await branchValidationSchema.validateAsync(req.body);
+        const { branch_name, branch_status, branch_address, created_by, updated_by } = validatedData;
+
+        // Update the branch
         const branch = await Branch.findByIdAndUpdate(id, { branch_name, branch_status, branch_address, created_by, updated_by }, { new: true });
-        if (!branch) return res.status(404).json({ message: "Branch not found" });
+
+        if (!branch) {
+            return res.status(404).json({ message: "Branch not found" });
+        }
+
         // response
         res.status(201).json({
             success: true,

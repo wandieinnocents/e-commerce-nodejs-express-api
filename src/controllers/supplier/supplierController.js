@@ -1,40 +1,11 @@
 const Supplier = require('../../models/Supplier');
-const Joi = require('joi');
-
-
-// Schema validation
-const supplierSchema = Joi.object({
-    supplier_name: Joi.string().trim().required().messages({
-        'any.required': 'Supplier name is required',
-        'string.empty': 'Supplier name cannot be empty',
-    }),
-    /*
-    branch_status: Joi.number().integer().optional().messages({
-        'number.base': 'Branch status must be a number',
-    }),
-    */
-    supplier_phone: Joi.number().integer().optional().messages({
-        'number.required': 'Phone number is required',
-        'number.base': 'Phone number must be a number',
-        'number.empty': 'Phone number cannot be empty',
-    }),
-    branch_address: Joi.string().trim().optional(),
-    created_by: Joi.number().integer().optional().messages({
-        'number.base': 'Created by must be a number',
-    }),
-    updated_by: Joi.number().integer().optional().messages({
-        'number.base': 'Updated by must be a number',
-    }),
-}).strict().unknown(false);
+const { supplierSchemaValidation } = require('../../validations/supplier/supplierValidations');
 
 
 // create branch
 const createSupplier = async (req, res) => {
-
-
     try {
-
-        const validatedData = await supplierSchema.validateAsync(req.body);
+        const validatedData = await supplierSchemaValidation.validateAsync(req.body);
         const {
             supplier_name,
             supplier_email,
@@ -217,4 +188,3 @@ module.exports = {
     // updateBranch,
     // deleteBranch,
 };
-
