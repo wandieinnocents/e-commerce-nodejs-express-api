@@ -1,19 +1,41 @@
 const Branch = require('../models/Branch');
+const Joi = require('joi');
+
+
+// Schema validation
+const branchSchema = Joi.object({
+    branch_name: Joi.string().trim().required().messages({
+        'any.required': 'Branch name is required',
+        'string.empty': 'Branch name cannot be empty',
+    }),
+    branch_status: Joi.number().integer().optional().messages({
+        'number.base': 'Branch status must be a number',
+    }),
+    branch_address: Joi.string().trim().optional(),
+    created_by: Joi.number().integer().optional().messages({
+        'number.base': 'Created by must be a number',
+    }),
+    updated_by: Joi.number().integer().optional().messages({
+        'number.base': 'Updated by must be a number',
+    }),
+}).strict().unknown(false);
+
 
 // create branch
 const createBranch = async (req, res) => {
-    const { branch_code, branch_name, branch_status, branch_address, created_by, updated_by } = req.body;
-    if (!branch_name) {
-        return res.status(401).json({ message: "Branch name is required" });
-    }
 
     try {
+        // Validate input
+        const validatedData = await branchSchema.validateAsync(req.body);
+        const { branch_name, branch_status, branch_address, created_by, updated_by } = validatedData;
+
+        // Check if branch already exists
         const existing = await Branch.findOne({ branch_name });
         if (existing) {
             return res.status(401).json({ message: "Branch already exists" });
         }
 
-        // Find the last inserted branch (sorted by creation)
+        // Generate new branch_code
         const lastBranch = await Branch.findOne().sort({ createdAt: -1 });
 
         let newId = 1;
@@ -30,6 +52,7 @@ const createBranch = async (req, res) => {
         const formattedId = String(newId).padStart(5, '0');
         const branch_code = `BR-${formattedId}`;
 
+        //create the branch
         const newBranch = await Branch.create({ branch_code, branch_name, branch_status, branch_address, created_by, updated_by });
 
         // response
@@ -39,6 +62,13 @@ const createBranch = async (req, res) => {
             data: newBranch,
         });
     } catch (error) {
+
+        // Handle Joi validation errors
+        if (error.isJoi) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+
+        // Handle other errors
         return res.status(500).json({
             success: false,
             message: "Something went wrong. Please try again later.",
