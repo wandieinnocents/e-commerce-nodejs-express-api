@@ -2,3 +2,6 @@
 
 This is a nodejs version wanran bi
 
+## Libraries
+- Schema Validation : https://joi.dev
+- 
