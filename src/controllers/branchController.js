@@ -3,7 +3,6 @@ const Branch = require('../models/Branch');
 const { storeBranchValidation } = require('../validations/branch/branchValidations');
 const { updateBranchValidation } = require('../validations/branch/branchValidations');
 
-
 // create branch
 const createBranch = async (req, res) => {
 
