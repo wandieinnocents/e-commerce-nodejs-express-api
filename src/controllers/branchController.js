@@ -90,7 +90,7 @@ const getAllBranches = async (req, res) => {
 //get branch by id
 const getBranchById = async (req, res) => {
     const { id } = req.params;
-      // Validate ID format
+    // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: "Invalid branch ID format" });
     }
@@ -121,6 +121,21 @@ const updateBranch = async (req, res) => {
     try {
         const validatedData = await updateBranchValidation.validateAsync(req.body);
         const { branch_name, branch_status, branch_address, created_by, updated_by } = validatedData;
+
+        // Check for uniqueness of fields
+        const existingBranch = await Branch.findOne({
+            // Exclude the current branch from the search
+            _id: { $ne: id },
+            $or: [
+                { branch_name },
+            ]
+        });
+
+        if (existingBranch) {
+            if (existingBranch.branch_name === branch_name) {
+                return res.status(401).json({ message: "Branch with this name  already exists" });
+            }
+        }
 
         // Update the branch
         const branch = await Branch.findByIdAndUpdate(id, { branch_name, branch_status, branch_address, created_by, updated_by }, { new: true });
