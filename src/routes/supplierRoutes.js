@@ -1,9 +1,9 @@
 const express = require("express");
 const {
   createSupplier,
-  // getAllProducts,
-  // getProductById,
-  // updateProduct,
+  getAllSuppliers,
+  getSupplierById,
+  updateSupplier,
   // deleteProduct,
   // getByCategory
 } = require("../controllers/supplier/supplierController");
@@ -11,9 +11,9 @@ const {
 const router = express.Router();
 
 router.post("/", createSupplier,);
-// router.get("/", getAllProducts);
-// router.get("/:id", getProductById);
-// router.put("/:id", updateProduct);
+router.get("/", getAllSuppliers);
+router.get("/:id", getSupplierById);
+router.put("/:id", updateSupplier);
 // router.delete("/:id", deleteProduct);
 // router.get("/category/:category", getByCategory);
 

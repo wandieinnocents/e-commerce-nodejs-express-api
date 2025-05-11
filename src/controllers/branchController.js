@@ -90,18 +90,23 @@ const getAllBranches = async (req, res) => {
 //get branch by id
 const getBranchById = async (req, res) => {
     const { id } = req.params;
+      // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid branch ID format" });
+    }
+
     try {
         const branch = await Branch.findById(id);
         if (!branch) {
             return res.status(404).json({ message: "Branch not found" });
         }
-        res.status(201).json({
+        res.status(200).json({
             success: true,
             message: "Branch retrieved successfully",
             data: branch,
         });
 
-    } catch (err) {
+    } catch (error) {
         return res.status(500).json({
             success: false,
             message: "Something went wrong. Please try again later.",
@@ -130,7 +135,7 @@ const updateBranch = async (req, res) => {
             message: "Branch created successfully",
             data: branch,
         });
-    } catch (err) {
+    } catch (error) {
         return res.status(500).json({
             success: false,
             message: "Something went wrong. Please try again later.",
@@ -154,7 +159,7 @@ const deleteBranch = async (req, res) => {
             data: branch,
         });
 
-    } catch (err) {
+    } catch (error) {
         return res.status(500).json({
             success: false,
             message: "Something went wrong. Please try again later.",

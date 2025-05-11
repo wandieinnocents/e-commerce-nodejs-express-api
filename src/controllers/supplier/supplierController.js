@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Supplier = require('../../models/Supplier');
 const { supplierSchemaValidation } = require('../../validations/supplier/supplierValidations');
 
@@ -31,7 +32,12 @@ const createSupplier = async (req, res) => {
         });
 
         if (existingSupplier) {
-            return res.status(401).json({ message: "Supplier with this phone or email already exists" });
+            if (existingSupplier.supplier_phone === supplier_phone) {
+                return res.status(401).json({ message: "Supplier with this phone number already exists" });
+            }
+            if (existingSupplier.supplier_email === supplier_email) {
+                return res.status(401).json({ message: "Supplier with this email already exists" });
+            }
         }
 
         // Find the last inserted branch (sorted by creation)
@@ -84,78 +90,157 @@ const createSupplier = async (req, res) => {
     }
 };
 
-// get all branches
-// const getAllBranches = async (req, res) => {
-//     try {
-//         const branches = await Branch.find();
-//         //if no branches found
-//         if (!branches || branches.length === 0) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "No branches found",
-//             });
-//         }
+// get all suppliers
+const getAllSuppliers = async (req, res) => {
+    try {
+        const suppliers = await Supplier.find();
+        //if no suppliers found
+        if (!suppliers || suppliers.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No suppliers found",
+            });
+        }
 
-//         res.status(201).json({
-//             success: true,
-//             message: "Branches retrieved successfully",
-//             data: branches,
-//         });
+        res.status(201).json({
+            success: true,
+            message: "Suppliers retrieved successfully",
+            data: suppliers,
+        });
 
-//     } catch (error) {
-//         console.log(error);
-//         return res.status(500).json({
-//             success: false,
-//             message: "Something went wrong. Please try again later.",
-//             error: error.message,
-//         });
-//     }
-// };
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong. Please try again later.",
+            error: error.message,
+        });
+    }
+};
 
-// //get branch by id
-// const getBranchById = async (req, res) => {
-//     const { id } = req.params;
-//     try {
-//         const branch = await Branch.findById(id);
-//         if (!branch) {
-//             return res.status(404).json({ message: "Branch not found" });
-//         }
-//         res.status(201).json({
-//             success: true,
-//             message: "Branch retrieved successfully",
-//             data: branch,
-//         });
+//get supplier by id
+const getSupplierById = async (req, res) => {
+    const { id } = req.params;
 
-//     } catch (err) {
-//         return res.status(500).json({
-//             success: false,
-//             message: "Something went wrong. Please try again later.",
-//             error: error.message,
-//         });
-//     }
-// };
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid supplier ID format" });
+    }
 
-// //update branch 
-// const updateBranch = async (req, res) => {
-//     const { id } = req.params;
-//     const { branch_code, branch_name, branch_status, branch_address, created_by, updated_by } = req.body;
-//     try {
-//         const branch = await Branch.findByIdAndUpdate(id, { branch_name, branch_status, branch_address, created_by, updated_by }, { new: true });
-//         if (!branch) return res.status(404).json({ message: "Branch not found" });
-//         // response
-//         res.status(201).json({
-//             success: true,
-//             message: "Branch created successfully",
-//             data: branch,
-//         });
-//     } catch (err) {
-//         return res.status(500).json({
-//             success: false,
-//             message: "Something went wrong. Please try again later.",
-//             error: error.message,
-//         });
-//     }
-// }
+    try {
+        const supplier = await Supplier.findById(id);
+        if (!supplier) {
+            return res.status(404).json({ message: "Supplier not found" });
+        }
+        res.status(201).json({
+            success: true,
+            message: "Supplier retrieved successfully",
+            data: supplier,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong. Please try again later.",
+            error: error.message,
+        });
+    }
+};
+
+//update supplier 
+const updateSupplier = async (req, res) => {
+    const { id } = req.params;
+
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid supplier ID format" });
+    }
+
+    try {
+        // Validate request body
+        const validatedData = await supplierSchemaValidation.validateAsync(req.body);
+        const {
+            supplier_name,
+            supplier_email,
+            supplier_phone,
+            supplier_city,
+            supplier_address,
+            supplier_country,
+            supplier_organization,
+            supplier_status,
+            supplier_description,
+            supplier_website_url,
+            supplier_image,
+            created_by,
+            updated_by
+        } = validatedData;
+
+        // Check for uniqueness of email or phone (excluding the current supplier)
+        const existingSupplier = await Supplier.findOne({
+            // Exclude the current supplier from the search
+            _id: { $ne: id },
+            $or: [
+                { supplier_phone },
+                { supplier_email }
+            ]
+        });
+
+        if (existingSupplier) {
+            if (existingSupplier.supplier_phone === supplier_phone) {
+                return res.status(401).json({ message: "Supplier with this phone number already exists" });
+            }
+            if (existingSupplier.supplier_email === supplier_email) {
+                return res.status(401).json({ message: "Supplier with this email already exists" });
+            }
+        }
+
+        // Proceed to update
+        const supplier = await Supplier.findByIdAndUpdate(
+            id,
+            {
+                supplier_name,
+                supplier_email,
+                supplier_phone,
+                supplier_city,
+                supplier_address,
+                supplier_country,
+                supplier_organization,
+                supplier_status,
+                supplier_description,
+                supplier_website_url,
+                supplier_image,
+                created_by,
+                updated_by
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+
+        if (!supplier) {
+            return res.status(404).json({ message: "Supplier not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Supplier updated successfully",
+            data: supplier,
+        });
+
+    } catch (error) {
+        // Joi validation or other errors
+        if (error.isJoi) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong. Please try again later.",
+            error: error.message,
+        });
+    }
+};
 
 // //delete branch
 // const deleteBranch = async (req, res) => {
@@ -172,7 +257,7 @@ const createSupplier = async (req, res) => {
 //             data: branch,
 //         });
 
-//     } catch (err) {
+//     } catch (error) {
 //         return res.status(500).json({
 //             success: false,
 //             message: "Something went wrong. Please try again later.",
@@ -183,8 +268,8 @@ const createSupplier = async (req, res) => {
 
 module.exports = {
     createSupplier,
-    // getAllBranches,
-    // getBranchById,
-    // updateBranch,
+    getAllSuppliers,
+    getSupplierById,
+    updateSupplier,
     // deleteBranch,
 };

@@ -17,7 +17,9 @@ const supplierSchemaValidation = Joi.object({
     }),
     supplier_city: Joi.string().trim().optional(),
     supplier_address: Joi.string().trim().optional(),
-    supplier_country: Joi.string().trim().optional(),
+    supplier_country: Joi.number().integer().optional().messages({
+        'number.base': 'Supplier country  must be a number',
+    }),
     supplier_organization: Joi.string().trim().optional(),
     supplier_status: Joi.number().integer().optional().messages({
         'number.base': 'Supplier status must be a number',
