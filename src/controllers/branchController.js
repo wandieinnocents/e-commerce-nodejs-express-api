@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Branch = require('../models/Branch');
 const { storeBranchValidation } = require('../validations/branch/branchValidations');
 const { updateBranchValidation } = require('../validations/branch/branchValidations');
@@ -162,6 +163,12 @@ const updateBranch = async (req, res) => {
 //delete branch
 const deleteBranch = async (req, res) => {
     const { id } = req.params;
+
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid branch ID format" });
+    }
+
     try {
         const branch = await Branch.findByIdAndDelete(id);
         if (!branch) {

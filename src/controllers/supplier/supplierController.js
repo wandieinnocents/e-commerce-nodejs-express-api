@@ -243,33 +243,38 @@ const updateSupplier = async (req, res) => {
 };
 
 // //delete branch
-// const deleteBranch = async (req, res) => {
-//     const { id } = req.params;
-//     try {
-//         const branch = await Branch.findByIdAndDelete(id);
-//         if (!branch) {
-//             return res.status(404).json({ message: "Branch not found" });
-//         }
-//         // response
-//         res.status(200).json({
-//             success: true,
-//             message: "Branch deleted successfully",
-//             data: branch,
-//         });
+const deleteSupplier = async (req, res) => {
+    const { id } = req.params;
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid supplier ID format" });
+    }
 
-//     } catch (error) {
-//         return res.status(500).json({
-//             success: false,
-//             message: "Something went wrong. Please try again later.",
-//             error: error.message,
-//         });
-//     }
-// };
+    try {
+        const supplier = await Supplier.findByIdAndDelete(id);
+        if (!supplier) {
+            return res.status(404).json({ message: "Supplier not found" });
+        }
+        // response
+        res.status(200).json({
+            success: true,
+            message: "Supplier deleted successfully",
+            data: supplier,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong. Please try again later.",
+            error: error.message,
+        });
+    }
+};
 
 module.exports = {
     createSupplier,
     getAllSuppliers,
     getSupplierById,
     updateSupplier,
-    // deleteBranch,
+    deleteSupplier,
 };

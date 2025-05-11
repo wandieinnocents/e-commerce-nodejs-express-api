@@ -4,8 +4,7 @@ const {
   getAllSuppliers,
   getSupplierById,
   updateSupplier,
-  // deleteProduct,
-  // getByCategory
+  deleteSupplier,
 } = require("../controllers/supplier/supplierController");
 
 const router = express.Router();
@@ -14,7 +13,6 @@ router.post("/", createSupplier,);
 router.get("/", getAllSuppliers);
 router.get("/:id", getSupplierById);
 router.put("/:id", updateSupplier);
-// router.delete("/:id", deleteProduct);
-// router.get("/category/:category", getByCategory);
+router.delete("/:id", deleteSupplier);
 
 module.exports = router;
