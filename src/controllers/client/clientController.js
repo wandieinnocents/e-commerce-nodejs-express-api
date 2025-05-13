@@ -74,10 +74,7 @@ const createClient = async (req, res) => {
             status_code: 500,
             timestamp: new Date().toISOString(),
             message: "Something went wrong. Please try again later.",
-            error: {
-                message: error.message,
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-            },
+            error: error.message,
 
         });
     }
@@ -93,6 +90,8 @@ const getAllClients = async (req, res) => {
         if (!clients || clients.length === 0) {
             return res.status(404).json({
                 success: false,
+                status_code: 404,
+                timestamp: new Date().toISOString(),
                 message: "No clients found",
             });
         }
@@ -112,141 +111,129 @@ const getAllClients = async (req, res) => {
             success: false,
             status_code: 500,
             message: "Something went wrong. Please try again later.",
-            error: {
-                message: error.message,
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-            },
-            meta: {
-                timestamp: new Date().toISOString(),
-                api_version: "v1"
-            }
+            timestamp: new Date().toISOString(),
+            error: error.message
         });
     }
 };
 
-// //get supplier by id
-// const getSupplierById = async (req, res) => {
-//     const { id } = req.params;
+//get supplier by id
+const getClientById = async (req, res) => {
+    const { id } = req.params;
 
-//     // Validate ID format
-//     if (!mongoose.Types.ObjectId.isValid(id)) {
-//         return res.status(400).json({ message: "Invalid supplier ID format" });
-//     }
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid client ID format" });
+    }
 
-//     try {
-//         const supplier = await Supplier.findById(id);
-//         if (!supplier) {
-//             return res.status(404).json({ message: "Supplier not found" });
-//         }
-//         res.status(201).json({
-//             success: true,
-//             message: "Supplier retrieved successfully",
-//             data: supplier,
-//         });
+    try {
+        const client = await Client.findById(id);
+        if (!client) {
+            return res.status(404).json({
+                success: false,
+                status_code: 404,
+                timestamp: new Date().toISOString(),
+                message: "No client found",
+            });
+        }
+        res.status(201).json({
+            success: true,
+            status_code: 201,
+            message: "Client retrieved successfully",
+            timestamp: new Date().toISOString(),
+            data: client,
+        });
 
-//     } catch (error) {
-//         return res.status(500).json({
-//             success: false,
-//             message: "Something went wrong. Please try again later.",
-//             error: error.message,
-//         });
-//     }
-// };
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            status_code: 500,
+            message: "Something went wrong. Please try again later.",
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+};
 
-// //update supplier 
-// const updateSupplier = async (req, res) => {
-//     const { id } = req.params;
+//update supplier 
+const updateClient = async (req, res) => {
+    const { id } = req.params;
 
-//     // Validate ID format
-//     if (!mongoose.Types.ObjectId.isValid(id)) {
-//         return res.status(400).json({ message: "Invalid supplier ID format" });
-//     }
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid supplier ID format" });
+    }
 
-//     try {
-//         // Validate request body
-//         const validatedData = await clientSchemaValidation.validateAsync(req.body);
-//         const {
-//             supplier_name,
-//             supplier_email,
-//             supplier_phone,
-//             supplier_city,
-//             supplier_address,
-//             supplier_country,
-//             supplier_organization,
-//             supplier_status,
-//             supplier_description,
-//             supplier_website_url,
-//             supplier_image,
-//             created_by,
-//             updated_by
-//         } = validatedData;
+    try {
+        // Validate request body
+        const validatedData = await clientSchemaValidation.validateAsync(req.body);
+        const {
+            first_name, last_name, other_names, age, email, profession, phone, country_id, address, website, client_status, organization, client_photo, description, created_by, updated_by
+        } = validatedData;
 
-//         // Check for uniqueness of email or phone (excluding the current supplier)
-//         const existingSupplier = await Supplier.findOne({
-//             // Exclude the current supplier from the search
-//             _id: { $ne: id },
-//             $or: [
-//                 { supplier_phone },
-//                 { supplier_email }
-//             ]
-//         });
+        // Check for uniqueness of email or phone (excluding the current client)
+        const existingClient = await Client.findOne({
+            // Exclude the current client from the search
+            _id: { $ne: id },
+            $or: [
+                { phone },
+                { email }
+            ]
+        });
 
-//         if (existingSupplier) {
-//             if (existingSupplier.supplier_phone === supplier_phone) {
-//                 return res.status(401).json({ message: "Supplier with this phone number already exists" });
-//             }
-//             if (existingSupplier.supplier_email === supplier_email) {
-//                 return res.status(401).json({ message: "Supplier with this email already exists" });
-//             }
-//         }
+        if (existingClient) {
+            if (existingClient.phone === phone) {
+                return res.status(401).json({
+                    success: false,
+                    status_code: 401,
+                    timestamp: new Date().toISOString(),
+                    message: "Client with this phone number already exists"
+                });
+            }
+            if (existingClient.email === email) {
+                return res.status(401).json({ message: "Client with this email already exists" });
+            }
+        }
 
-//         // Proceed to update
-//         const supplier = await Supplier.findByIdAndUpdate(
-//             id,
-//             {
-//                 supplier_name,
-//                 supplier_email,
-//                 supplier_phone,
-//                 supplier_city,
-//                 supplier_address,
-//                 supplier_country,
-//                 supplier_organization,
-//                 supplier_status,
-//                 supplier_description,
-//                 supplier_website_url,
-//                 supplier_image,
-//                 created_by,
-//                 updated_by
-//             },
-//             {
-//                 new: true,
-//                 runValidators: true
-//             }
-//         );
+        // Proceed to update
+        const client = await Client.findByIdAndUpdate(
+            id,
+            {
+                first_name, last_name, other_names, age, email, profession, phone, country_id, address, website, client_status, organization, client_photo, description, created_by, updated_by
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        );
 
-//         if (!supplier) {
-//             return res.status(404).json({ message: "Supplier not found" });
-//         }
+        if (!client) {
+            return res.status(404).json({ message: "Client not found" });
+        }
 
-//         res.status(200).json({
-//             success: true,
-//             message: "Supplier updated successfully",
-//             data: supplier,
-//         });
+        res.status(200).json({
+            success: true,
+            status_code: 200,
+            message: "Client updated successfully",
+            timestamp: new Date().toISOString(),
+            data: client
+        });
 
-//     } catch (error) {
-//         // Joi validation or other errors
-//         if (error.isJoi) {
-//             return res.status(400).json({ message: error.details[0].message });
-//         }
+    } catch (error) {
+        // Joi validation or other errors
+        if (error.isJoi) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
 
-//         res.status(500).json({
-//             success: false,
-//             message: "Something went wrong. Please try again later.",
-//             error: error.message,
-//         });
-//     }
-// };
+        res.status(500).json({
+            success: false,
+            status_code: 500,
+            timestamp: new Date().toISOString(),
+            message: "Something went wrong. Please try again later.",
+            error: error.message,
+        });
+    }
+};
 
 // // //delete branch
 // const deleteSupplier = async (req, res) => {
@@ -280,7 +267,7 @@ const getAllClients = async (req, res) => {
 module.exports = {
     createClient,
     getAllClients,
-    // getSupplierById,
-    // updateSupplier,
+    getClientById,
+    updateClient,
     // deleteSupplier,
 };
