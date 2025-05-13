@@ -3,7 +3,7 @@ const Supplier = require('../../models/Supplier');
 const { supplierSchemaValidation } = require('../../validations/supplier/supplierValidations');
 
 
-// create branch
+// create supplier
 const createSupplier = async (req, res) => {
     try {
         const validatedData = await supplierSchemaValidation.validateAsync(req.body);
@@ -40,7 +40,7 @@ const createSupplier = async (req, res) => {
             }
         }
 
-        // Find the last inserted branch (sorted by creation)
+        // Find the last inserted supplier (sorted by creation)
         const lastSupplier = await Supplier.findOne().sort({ createdAt: -1 });
 
         let newId = 1;
@@ -242,7 +242,7 @@ const updateSupplier = async (req, res) => {
     }
 };
 
-// //delete branch
+//delete supplier
 const deleteSupplier = async (req, res) => {
     const { id } = req.params;
     // Validate ID format

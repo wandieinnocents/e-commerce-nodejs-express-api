@@ -6,6 +6,7 @@ const authRoutes = require("./src/routes/authRoutes");
 const productRoutes = require("./src/routes/productRoutes");
 const branchRoutes = require("./src/routes/branchRoutes");
 const supplierRoutes = require("./src/routes/supplierRoutes");
+const clientRoutes = require("./src/routes/clientRoutes");
 
 dotenv.config();
 const app = express();
@@ -14,7 +15,7 @@ app.use(express.json());
 // DB Connection
 connectDB();
 
-// Routes
+// Api Endpoints
 app.get("/", (req, res) => {
     res.send("API is running...");
 });
@@ -23,6 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/branches", branchRoutes);
 app.use("/api/suppliers", supplierRoutes);
+app.use("/api/clients", clientRoutes);
 
 const port = process.env.PORT;
 app.listen(port, () => {
