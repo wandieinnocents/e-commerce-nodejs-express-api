@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Client = require('../../models/Client');
 const { clientSchemaValidation } = require('../../validations/client/clientValidations');
+const { createdResponse, updatedResponse, serverErrorResponse, unauthorizedResponse } = require('../../utils/responseHandler');
 
 
 // create branch
@@ -21,18 +22,12 @@ const createClient = async (req, res) => {
 
         if (existingClient) {
             if (existingClient.phone === phone) {
-                return res.status(401).json({
-                    success: false,
-                    status_code: 401,
-                    timestamp: new Date().toISOString(),
+                return unauthorizedResponse(res, {
                     message: "Client with this phone number already exists"
                 });
             }
             if (existingClient.email === email) {
-                return res.status(401).json({
-                    success: false,
-                    status_code: 401,
-                    timestamp: new Date().toISOString(),
+                return unauthorizedResponse(res, {
                     message: "Client with this email already exists"
                 });
             }
@@ -61,21 +56,13 @@ const createClient = async (req, res) => {
             });
 
         // response
-        res.status(201).json({
-            success: true,
-            status_code: 201,
-            message: "Client created successfully",
-            timestamp: new Date().toISOString(),
-            data: newClient,
+        return createdResponse(res, {
+            message: "Client created successfullyx",
+            data: newClient
         });
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            status_code: 500,
-            timestamp: new Date().toISOString(),
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
-
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
@@ -123,7 +110,12 @@ const getClientById = async (req, res) => {
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Invalid client ID format" });
+        return res.status(400).json({
+            success: false,
+            status_code: 400,
+            message: "Invalid client ID format",
+            timestamp: new Date().toISOString(),
+        });
     }
 
     try {
@@ -161,7 +153,12 @@ const updateClient = async (req, res) => {
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Invalid supplier ID format" });
+        return res.status(400).json({
+            success: false,
+            status_code: 400,
+            message: "Invalid client ID format",
+            timestamp: new Date().toISOString(),
+        });
     }
 
     try {
@@ -191,7 +188,12 @@ const updateClient = async (req, res) => {
                 });
             }
             if (existingClient.email === email) {
-                return res.status(401).json({ message: "Client with this email already exists" });
+                return res.status(401).json({
+                    success: false,
+                    status_code: 401,
+                    message: "Client with this email already exists",
+                    timestamp: new Date().toISOString(),
+                });
             }
         }
 
@@ -208,23 +210,22 @@ const updateClient = async (req, res) => {
         );
 
         if (!client) {
-            return res.status(404).json({ message: "Client not found" });
+            return res.status(404).json({
+                success: true,
+                status_code: 404,
+                message: "Client not found",
+                timestamp: new Date().toISOString(),
+            });
         }
 
-        res.status(200).json({
-            success: true,
-            status_code: 200,
+        // response
+        return updatedResponse(res, {
             message: "Client updated successfully",
-            timestamp: new Date().toISOString(),
             data: client
         });
 
-    } catch (error) {
-        // Joi validation or other errors
-        if (error.isJoi) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
 
+    } catch (error) {
         res.status(500).json({
             success: false,
             status_code: 500,
@@ -235,39 +236,54 @@ const updateClient = async (req, res) => {
     }
 };
 
-// // //delete branch
-// const deleteSupplier = async (req, res) => {
-//     const { id } = req.params;
-//     // Validate ID format
-//     if (!mongoose.Types.ObjectId.isValid(id)) {
-//         return res.status(400).json({ message: "Invalid supplier ID format" });
-//     }
+// //delete branch
+const deleteClient = async (req, res) => {
+    const { id } = req.params;
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({
+            success: false,
+            status_code: 400,
+            message: "Invalid client ID format",
+            timestamp: new Date().toISOString(),
+        });
+    }
 
-//     try {
-//         const supplier = await Supplier.findByIdAndDelete(id);
-//         if (!supplier) {
-//             return res.status(404).json({ message: "Supplier not found" });
-//         }
-//         // response
-//         res.status(200).json({
-//             success: true,
-//             message: "Supplier deleted successfully",
-//             data: supplier,
-//         });
+    try {
+        const client = await Client.findByIdAndDelete(id);
+        if (!client) {
+            return res.status(404).json({
+                success: true,
+                status_code: 404,
+                message: "Client not found",
+                timestamp: new Date().toISOString(),
+            });
+        }
 
-//     } catch (error) {
-//         return res.status(500).json({
-//             success: false,
-//             message: "Something went wrong. Please try again later.",
-//             error: error.message,
-//         });
-//     }
-// };
+        // response
+        res.status(200).json({
+            success: true,
+            status_code: 200,
+            message: "Client deleted successfully",
+            timestamp: new Date().toISOString(),
+            data: client
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            status_code: 500,
+            timestamp: new Date().toISOString(),
+            message: "Something went wrong. Please try again later.",
+            error: error.message,
+        });
+    }
+};
 
 module.exports = {
     createClient,
     getAllClients,
     getClientById,
     updateClient,
-    // deleteSupplier,
+    deleteClient,
 };
