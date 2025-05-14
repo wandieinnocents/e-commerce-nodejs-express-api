@@ -4,13 +4,15 @@
 const successResponse = (res, {
     statusCode = 200,
     message = "Request successful.",
-    data = null
+    data = null,
+    records_count = null
 }) => {
     return res.status(statusCode).json({
         success: true,
         status_code: statusCode,
         timestamp: new Date().toISOString(),
         message,
+        ...(records_count && { records_count }),
         ...(data && { data })
     });
 };
@@ -31,7 +33,7 @@ const createdResponse = (res, {
 
 //200 //creating a new resource
 const updatedResponse = (res, {
-    message = "Resource created successfully.",
+    message = "Resource updated successfully.",
     data = null
 }) => {
     return res.status(200).json({
@@ -87,18 +89,18 @@ const notFoundResponse = (res, {
 };
 
 //400 //Bad request
-// const badRequestResponse = (res, {
-//     message = "Bad request.",
-//     error = null
-// }) => {
-//     return res.status(400).json({
-//         success: false,
-//         status_code: 400,
-//         timestamp: new Date().toISOString(),
-//         message,
-//         ...(error && { error })
-//     });
-// };
+const badRequestResponse = (res, {
+    message = "Bad request.",
+    error = null
+}) => {
+    return res.status(400).json({
+        success: false,
+        status_code: 400,
+        timestamp: new Date().toISOString(),
+        message,
+        ...(error && { error })
+    });
+};
 
 //403 //Forbidden
 // const forbiddenResponse = (res, {
@@ -122,4 +124,5 @@ module.exports = {
     unauthorizedResponse,
     serverErrorResponse,
     notFoundResponse,
+    badRequestResponse,
 };

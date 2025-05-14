@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
 const Client = require('../../models/Client');
 const { clientSchemaValidation } = require('../../validations/client/clientValidations');
-const { createdResponse, updatedResponse, serverErrorResponse, unauthorizedResponse,notFoundResponse } = require('../../utils/responseHandler');
+const { createdResponse, successResponse, updatedResponse, serverErrorResponse, unauthorizedResponse, notFoundResponse, badRequestResponse } = require('../../utils/responseHandler');
 
-
-// create branch
+// create client
 const createClient = async (req, res) => {
     try {
         const validatedData = await clientSchemaValidation.validateAsync(req.body);
@@ -57,7 +56,7 @@ const createClient = async (req, res) => {
 
         // response
         return createdResponse(res, {
-            message: "Client created successfullyx",
+            message: "Client created successfully",
             data: newClient
         });
     } catch (error) {
@@ -67,7 +66,7 @@ const createClient = async (req, res) => {
     }
 };
 
-// get all suppliers
+// get all clients
 const getAllClients = async (req, res) => {
     try {
         const clients = await Client.find();
@@ -75,46 +74,34 @@ const getAllClients = async (req, res) => {
 
         //if no clients found
         if (!clients || clients.length === 0) {
-            return res.status(404).json({
-                success: false,
-                status_code: 404,
-                timestamp: new Date().toISOString(),
+            return notFoundResponse(res, {
                 message: "No clients found",
             });
         }
 
-        res.status(201).json({
-            success: true,
-            status_code: 201,
-            message: "Clients retrieved successfully",
-            total_clients: client_count,
-            timestamp: new Date().toISOString(),
-            data: clients,
+        // success response 
+        return successResponse(res, {
+            message: "Clients retrieved successfullyc",
+            records_count: client_count,
+            data: clients
         });
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            success: false,
-            status_code: 500,
-            message: "Something went wrong. Please try again later.",
-            timestamp: new Date().toISOString(),
+        return serverErrorResponse(res, {
             error: error.message
         });
     }
 };
 
-//get supplier by id
+//get client by id
 const getClientById = async (req, res) => {
     const { id } = req.params;
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({
-            success: false,
-            status_code: 400,
+        return badRequestResponse(res, {
             message: "Invalid client ID format",
-            timestamp: new Date().toISOString(),
         });
     }
 
@@ -122,39 +109,32 @@ const getClientById = async (req, res) => {
         const client = await Client.findById(id);
         if (!client) {
             return notFoundResponse(res, {
-                message: "No client foundff"
+                message: "Client not found",
             });
         }
-        res.status(201).json({
-            success: true,
-            status_code: 201,
+
+        //success response
+        return successResponse(res, {
             message: "Client retrieved successfully",
-            timestamp: new Date().toISOString(),
-            data: client,
+            data: client
         });
 
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            status_code: 500,
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
-            timestamp: new Date().toISOString()
+        console.log(error);
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
 
-//update supplier 
+//update client 
 const updateClient = async (req, res) => {
     const { id } = req.params;
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({
-            success: false,
-            status_code: 400,
+        return badRequestResponse(res, {
             message: "Invalid client ID format",
-            timestamp: new Date().toISOString(),
         });
     }
 
@@ -177,19 +157,13 @@ const updateClient = async (req, res) => {
 
         if (existingClient) {
             if (existingClient.phone === phone) {
-                return res.status(401).json({
-                    success: false,
-                    status_code: 401,
-                    timestamp: new Date().toISOString(),
+                return unauthorizedResponse(res, {
                     message: "Client with this phone number already exists"
                 });
             }
             if (existingClient.email === email) {
-                return res.status(401).json({
-                    success: false,
-                    status_code: 401,
-                    message: "Client with this email already exists",
-                    timestamp: new Date().toISOString(),
+                return unauthorizedResponse(res, {
+                    message: "Client with this email already exists"
                 });
             }
         }
@@ -207,11 +181,8 @@ const updateClient = async (req, res) => {
         );
 
         if (!client) {
-            return res.status(404).json({
-                success: true,
-                status_code: 404,
+            return notFoundResponse(res, {
                 message: "Client not found",
-                timestamp: new Date().toISOString(),
             });
         }
 
@@ -223,54 +194,40 @@ const updateClient = async (req, res) => {
 
 
     } catch (error) {
-        //error response
+        console.log(error);
         return serverErrorResponse(res, {
             error: error.message
         });
-
     }
 };
 
-// //delete branch
+//delete client
 const deleteClient = async (req, res) => {
     const { id } = req.params;
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({
-            success: false,
-            status_code: 400,
+        return badRequestResponse(res, {
             message: "Invalid client ID format",
-            timestamp: new Date().toISOString(),
         });
     }
 
     try {
         const client = await Client.findByIdAndDelete(id);
         if (!client) {
-            return res.status(404).json({
-                success: true,
-                status_code: 404,
+            return notFoundResponse(res, {
                 message: "Client not found",
-                timestamp: new Date().toISOString(),
             });
         }
 
-        // response
-        res.status(200).json({
-            success: true,
-            status_code: 200,
+        return successResponse(res, {
             message: "Client deleted successfully",
-            timestamp: new Date().toISOString(),
             data: client
         });
 
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            status_code: 500,
-            timestamp: new Date().toISOString(),
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        console.log(error);
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
