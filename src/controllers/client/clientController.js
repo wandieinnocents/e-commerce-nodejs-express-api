@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Client = require('../../models/Client');
 const { clientSchemaValidation } = require('../../validations/client/clientValidations');
-const { createdResponse, updatedResponse, serverErrorResponse, unauthorizedResponse } = require('../../utils/responseHandler');
+const { createdResponse, updatedResponse, serverErrorResponse, unauthorizedResponse,notFoundResponse } = require('../../utils/responseHandler');
 
 
 // create branch
@@ -121,11 +121,8 @@ const getClientById = async (req, res) => {
     try {
         const client = await Client.findById(id);
         if (!client) {
-            return res.status(404).json({
-                success: false,
-                status_code: 404,
-                timestamp: new Date().toISOString(),
-                message: "No client found",
+            return notFoundResponse(res, {
+                message: "No client foundff"
             });
         }
         res.status(201).json({
@@ -226,13 +223,11 @@ const updateClient = async (req, res) => {
 
 
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            status_code: 500,
-            timestamp: new Date().toISOString(),
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        //error response
+        return serverErrorResponse(res, {
+            error: error.message
         });
+
     }
 };
 
