@@ -5,7 +5,7 @@ const {
     getBranchById,
     updateBranch,
     deleteBranch,
-} = require("../controllers/branchController");
+} = require("../controllers/branch/branchController");
 
 const router = express.Router();
 

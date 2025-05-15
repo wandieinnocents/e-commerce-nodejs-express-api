@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
-const Branch = require('../models/Branch');
-const { storeBranchValidation } = require('../validations/branch/branchValidations');
-const { updateBranchValidation } = require('../validations/branch/branchValidations');
+const Branch = require('../../models/Branch');
+const { storeBranchValidation } = require('../../validations/branch/branchValidations');
+const { updateBranchValidation } = require('../../validations/branch/branchValidations');
+const { createdResponse, successResponse, updatedResponse, serverErrorResponse, unauthorizedResponse, notFoundResponse, badRequestResponse } = require('../../utils/responseHandler');
+
 
 // create branch
 const createBranch = async (req, res) => {
@@ -14,7 +16,10 @@ const createBranch = async (req, res) => {
         // Check if branch already exists
         const existing = await Branch.findOne({ branch_name });
         if (existing) {
-            return res.status(401).json({ message: "Branch already exists" });
+            // return res.status(401).json({ message: "Branch already exists" });
+            return unauthorizedResponse(res, {
+                message: "Branch already exists"
+            });
         }
 
         // Generate new branch_code
@@ -38,23 +43,13 @@ const createBranch = async (req, res) => {
         const newBranch = await Branch.create({ branch_code, branch_name, branch_status, branch_address, created_by, updated_by });
 
         // response
-        res.status(201).json({
-            success: true,
+        return createdResponse(res, {
             message: "Branch created successfully",
-            data: newBranch,
+            data: newBranch
         });
     } catch (error) {
-
-        // Handle Joi validation errors
-        if (error.isJoi) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
-
-        // Handle other errors
-        return res.status(500).json({
-            success: false,
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
@@ -63,26 +58,23 @@ const createBranch = async (req, res) => {
 const getAllBranches = async (req, res) => {
     try {
         const branches = await Branch.find();
+        const branches_count = await Branch.countDocuments();
         //if no branches found
         if (!branches || branches.length === 0) {
-            return res.status(404).json({
-                success: false,
+            return notFoundResponse(res, {
                 message: "No branches found",
             });
         }
 
-        res.status(201).json({
-            success: true,
+        return successResponse(res, {
             message: "Branches retrieved successfully",
-            data: branches,
+            records_count: branches_count,
+            data: branches
         });
 
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            success: false,
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
@@ -92,25 +84,28 @@ const getBranchById = async (req, res) => {
     const { id } = req.params;
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Invalid branch ID format" });
+        return badRequestResponse(res, {
+            message: "Invalid branch ID format",
+        });
     }
 
     try {
         const branch = await Branch.findById(id);
         if (!branch) {
-            return res.status(404).json({ message: "Branch not found" });
+            return notFoundResponse(res, {
+                message: "Branch not found",
+            });
         }
-        res.status(200).json({
-            success: true,
+
+        //success response
+        return successResponse(res, {
             message: "Branch retrieved successfully",
-            data: branch,
+            data: branch
         });
 
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
@@ -121,6 +116,14 @@ const updateBranch = async (req, res) => {
     try {
         const validatedData = await updateBranchValidation.validateAsync(req.body);
         const { branch_name, branch_status, branch_address, created_by, updated_by } = validatedData;
+
+        // Validate ID format
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return badRequestResponse(res, {
+                message: "Invalid branch ID format",
+            });
+        }
+
 
         // Check for uniqueness of fields
         const existingBranch = await Branch.findOne({
@@ -133,7 +136,9 @@ const updateBranch = async (req, res) => {
 
         if (existingBranch) {
             if (existingBranch.branch_name === branch_name) {
-                return res.status(401).json({ message: "Branch with this name  already exists" });
+                return unauthorizedResponse(res, {
+                    message: "Branch with this name  already exists"
+                });
             }
         }
 
@@ -141,20 +146,19 @@ const updateBranch = async (req, res) => {
         const branch = await Branch.findByIdAndUpdate(id, { branch_name, branch_status, branch_address, created_by, updated_by }, { new: true });
 
         if (!branch) {
-            return res.status(404).json({ message: "Branch not found" });
+            return notFoundResponse(res, {
+                message: "Branch not found",
+            });
         }
 
         // response
-        res.status(201).json({
-            success: true,
-            message: "Branch created successfully",
-            data: branch,
+        return successResponse(res, {
+            message: "Branches retrieved successfully",
+            data: branch
         });
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 }
@@ -165,26 +169,27 @@ const deleteBranch = async (req, res) => {
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Invalid branch ID format" });
+        return badRequestResponse(res, {
+            message: "Invalid branch ID format",
+        });
     }
 
     try {
         const branch = await Branch.findByIdAndDelete(id);
         if (!branch) {
-            return res.status(404).json({ message: "Branch not found" });
+            return notFoundResponse(res, {
+                message: "Branch not found",
+            });
         }
         // response
-        res.status(200).json({
-            success: true,
+        return successResponse(res, {
             message: "Branch deleted successfully",
-            data: branch,
+            data: branch
         });
 
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
