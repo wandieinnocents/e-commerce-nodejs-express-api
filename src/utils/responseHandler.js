@@ -31,7 +31,7 @@ const createdResponse = (res, {
     });
 };
 
-//200 //creating a new resource
+//200 //updating a new resource
 const updatedResponse = (res, {
     message = "Resource updated successfully.",
     data = null
@@ -103,18 +103,18 @@ const badRequestResponse = (res, {
 };
 
 //403 //Forbidden
-// const forbiddenResponse = (res, {
-//     message = "Forbidden.",
-//     error = null
-// }) => {
-//     return res.status(403).json({
-//         success: false,
-//         status_code: 403,
-//         timestamp: new Date().toISOString(),
-//         message,
-//         ...(error && { error })
-//     });
-// };
+const forbiddenResponse = (res, {
+    message = "Forbidden.",
+    error = null
+}) => {
+    return res.status(403).json({
+        success: false,
+        status_code: 403,
+        timestamp: new Date().toISOString(),
+        message,
+        ...(error && { error })
+    });
+};
 
 
 module.exports = {
@@ -125,4 +125,5 @@ module.exports = {
     serverErrorResponse,
     notFoundResponse,
     badRequestResponse,
+    forbiddenResponse,
 };

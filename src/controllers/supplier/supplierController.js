@@ -1,26 +1,14 @@
 const mongoose = require("mongoose");
 const Supplier = require('../../models/Supplier');
 const { supplierSchemaValidation } = require('../../validations/supplier/supplierValidations');
+const { createdResponse, successResponse, updatedResponse, serverErrorResponse, unauthorizedResponse, notFoundResponse, badRequestResponse } = require('../../utils/responseHandler');
 
 
 // create supplier
 const createSupplier = async (req, res) => {
     try {
         const validatedData = await supplierSchemaValidation.validateAsync(req.body);
-        const {
-            supplier_name,
-            supplier_email,
-            supplier_phone,
-            supplier_city,
-            supplier_address,
-            supplier_country,
-            supplier_organization,
-            supplier_status,
-            supplier_description,
-            supplier_website_url,
-            supplier_image,
-            created_by,
-            updated_by
+        const { supplier_name, supplier_email, supplier_phone, supplier_city, supplier_address, supplier_country, supplier_organization, supplier_status, supplier_description, supplier_website_url, supplier_image, created_by, updated_by
         } = validatedData;
 
         // Check if supplier with the same phone or email already exists
@@ -33,10 +21,14 @@ const createSupplier = async (req, res) => {
 
         if (existingSupplier) {
             if (existingSupplier.supplier_phone === supplier_phone) {
-                return res.status(401).json({ message: "Supplier with this phone number already exists" });
+                return unauthorizedResponse(res, {
+                    message: "Supplier with this phone number already exists"
+                });
             }
             if (existingSupplier.supplier_email === supplier_email) {
-                return res.status(401).json({ message: "Supplier with this email already exists" });
+                return unauthorizedResponse(res, {
+                    message: "Supplier with this email already exists"
+                });
             }
         }
 
@@ -59,33 +51,16 @@ const createSupplier = async (req, res) => {
 
         const newSupplier = await Supplier.create(
             {
-                supplier_code,
-                supplier_name,
-                supplier_email,
-                supplier_phone,
-                supplier_city,
-                supplier_address,
-                supplier_country,
-                supplier_organization,
-                supplier_status,
-                supplier_description,
-                supplier_website_url,
-                supplier_image,
-                created_by,
-                updated_by
+                supplier_code, supplier_name, supplier_email, supplier_phone, supplier_city, supplier_address, supplier_country, supplier_organization, supplier_status, supplier_description, supplier_website_url, supplier_image, created_by, updated_by
             });
 
-        // response
-        res.status(201).json({
-            success: true,
+        return createdResponse(res, {
             message: "Supplier created successfully",
-            data: newSupplier,
+            data: newSupplier
         });
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
@@ -94,26 +69,28 @@ const createSupplier = async (req, res) => {
 const getAllSuppliers = async (req, res) => {
     try {
         const suppliers = await Supplier.find();
+        const suppliers_count = await Supplier.countDocuments();
+
         //if no suppliers found
         if (!suppliers || suppliers.length === 0) {
-            return res.status(404).json({
-                success: false,
+            return notFoundResponse(res, {
                 message: "No suppliers found",
             });
+
+
         }
 
-        res.status(201).json({
-            success: true,
+        // success response
+        return successResponse(res, {
             message: "Suppliers retrieved successfully",
-            data: suppliers,
+            records_count: suppliers_count,
+            data: suppliers
         });
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            success: false,
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
@@ -124,25 +101,29 @@ const getSupplierById = async (req, res) => {
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Invalid supplier ID format" });
+        // return res.status(400).json({ message: "Invalid supplier ID format" });
+        return badRequestResponse(res, {
+            message: "Invalid supplier ID format",
+        });
     }
 
     try {
         const supplier = await Supplier.findById(id);
         if (!supplier) {
-            return res.status(404).json({ message: "Supplier not found" });
+            // return res.status(404).json({ message: "Supplier not found" });
+            return notFoundResponse(res, {
+                message: "Supplier not found",
+            });
         }
-        res.status(201).json({
-            success: true,
+
+        return successResponse(res, {
             message: "Supplier retrieved successfully",
-            data: supplier,
+            data: supplier
         });
 
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
@@ -153,26 +134,16 @@ const updateSupplier = async (req, res) => {
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Invalid supplier ID format" });
+        // return res.status(400).json({ message: "Invalid supplier ID format" });
+        return badRequestResponse(res, {
+            message: "Invalid supplier ID format",
+        });
     }
 
     try {
         // Validate request body
         const validatedData = await supplierSchemaValidation.validateAsync(req.body);
-        const {
-            supplier_name,
-            supplier_email,
-            supplier_phone,
-            supplier_city,
-            supplier_address,
-            supplier_country,
-            supplier_organization,
-            supplier_status,
-            supplier_description,
-            supplier_website_url,
-            supplier_image,
-            created_by,
-            updated_by
+        const { supplier_name, supplier_email, supplier_phone, supplier_city, supplier_address, supplier_country, supplier_organization, supplier_status, supplier_description, supplier_website_url, supplier_image, created_by, updated_by
         } = validatedData;
 
         // Check for uniqueness of email or phone (excluding the current supplier)
@@ -187,30 +158,21 @@ const updateSupplier = async (req, res) => {
 
         if (existingSupplier) {
             if (existingSupplier.supplier_phone === supplier_phone) {
-                return res.status(401).json({ message: "Supplier with this phone number already exists" });
+                return unauthorizedResponse(res, {
+                    message: "Supplier with this phone number already exists"
+                });
             }
             if (existingSupplier.supplier_email === supplier_email) {
-                return res.status(401).json({ message: "Supplier with this email already exists" });
+                return unauthorizedResponse(res, {
+                    message: "Supplier with this email already exists"
+                });
             }
         }
 
         // Proceed to update
-        const supplier = await Supplier.findByIdAndUpdate(
-            id,
+        const supplier = await Supplier.findByIdAndUpdate(id,
             {
-                supplier_name,
-                supplier_email,
-                supplier_phone,
-                supplier_city,
-                supplier_address,
-                supplier_country,
-                supplier_organization,
-                supplier_status,
-                supplier_description,
-                supplier_website_url,
-                supplier_image,
-                created_by,
-                updated_by
+                supplier_name, supplier_email, supplier_phone, supplier_city, supplier_address, supplier_country, supplier_organization, supplier_status, supplier_description, supplier_website_url, supplier_image, created_by, updated_by
             },
             {
                 new: true,
@@ -219,25 +181,22 @@ const updateSupplier = async (req, res) => {
         );
 
         if (!supplier) {
-            return res.status(404).json({ message: "Supplier not found" });
+            // return res.status(404).json({ message: "Supplier not found" });
+            return notFoundResponse(res, {
+                message: "Supplier not found",
+            });
         }
 
-        res.status(200).json({
-            success: true,
+        // success response
+        return successResponse(res, {
             message: "Supplier updated successfully",
-            data: supplier,
+            data: supplier
         });
 
     } catch (error) {
         // Joi validation or other errors
-        if (error.isJoi) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
-
-        res.status(500).json({
-            success: false,
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
@@ -247,26 +206,29 @@ const deleteSupplier = async (req, res) => {
     const { id } = req.params;
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Invalid supplier ID format" });
+        // return res.status(400).json({ message: "Invalid supplier ID format" });
+        return badRequestResponse(res, {
+            message: "Invalid supplier ID format",
+        });
     }
 
     try {
         const supplier = await Supplier.findByIdAndDelete(id);
         if (!supplier) {
-            return res.status(404).json({ message: "Supplier not found" });
+            // return res.status(404).json({ message: "Supplier not found" });
+            return notFoundResponse(res, {
+                message: "Supplier not found",
+            });
         }
         // response
-        res.status(200).json({
-            success: true,
+        return successResponse(res, {
             message: "Supplier deleted successfully",
-            data: supplier,
+            data: supplier
         });
 
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Something went wrong. Please try again later.",
-            error: error.message,
+        return serverErrorResponse(res, {
+            error: error.message
         });
     }
 };
