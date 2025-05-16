@@ -3,15 +3,17 @@ const Branch = require('../../models/Branch');
 const { storeBranchValidation } = require('../../validations/branch/branchValidations');
 const { updateBranchValidation } = require('../../validations/branch/branchValidations');
 const { createdResponse, successResponse, updatedResponse, serverErrorResponse, unauthorizedResponse, notFoundResponse, badRequestResponse } = require('../../utils/responseHandler');
-
+// const { authMiddlewareJWT } = require('../../middlewares/auth/authMiddleware');
 
 // create branch
 const createBranch = async (req, res) => {
 
+
+
     try {
         // Validate input
         const validatedData = await storeBranchValidation.validateAsync(req.body);
-        const { branch_name, branch_status, branch_address, created_by, updated_by } = validatedData;
+        const { branch_name, branch_status, branch_address } = validatedData;
 
         // Check if branch already exists
         const existing = await Branch.findOne({ branch_name });
@@ -39,8 +41,14 @@ const createBranch = async (req, res) => {
         const formattedId = String(newId).padStart(5, '0');
         const branch_code = `BR-${formattedId}`;
 
+        // Get logged-in user
+        const logged_in_user = req.user._id;
+
         //create the branch
-        const newBranch = await Branch.create({ branch_code, branch_name, branch_status, branch_address, created_by, updated_by });
+        const newBranch = await Branch.create({
+            branch_code, branch_name, branch_status, branch_address,
+            created_by: logged_in_user, updated_by: null
+        });
 
         // response
         return createdResponse(res, {
@@ -73,6 +81,14 @@ const getAllBranches = async (req, res) => {
         });
 
     } catch (error) {
+        // Handle validation errors
+        if (error.isJoi) {
+            return badRequestResponse(res, {
+                message: error.details[0].message
+            });
+        }
+
+
         return serverErrorResponse(res, {
             error: error.message
         });
@@ -90,7 +106,12 @@ const getBranchById = async (req, res) => {
     }
 
     try {
-        const branch = await Branch.findById(id);
+        // const branch = await Branch.findById(id);
+        const branch = await Branch.findById(id)
+            .populate('created_by', 'username email')   // populate created_by user fields
+            .populate('updated_by', 'username email');  // populate updated_by user fields
+
+
         if (!branch) {
             return notFoundResponse(res, {
                 message: "Branch not found",
@@ -142,8 +163,14 @@ const updateBranch = async (req, res) => {
             }
         }
 
+        // Get logged-in user
+        const logged_in_user = req.user._id;
+
         // Update the branch
-        const branch = await Branch.findByIdAndUpdate(id, { branch_name, branch_status, branch_address, created_by, updated_by }, { new: true });
+        const branch = await Branch.findByIdAndUpdate(id, {
+            branch_name, branch_status, branch_address,
+            created_by: logged_in_user, updated_by: logged_in_user
+        }, { new: true });
 
         if (!branch) {
             return notFoundResponse(res, {

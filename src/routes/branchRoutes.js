@@ -7,9 +7,11 @@ const {
     deleteBranch,
 } = require("../controllers/branch/branchController");
 
+const authMiddlewareJWT = require('../middlewares/auth/authMiddleware');
+
 const router = express.Router();
 
-router.post("/", createBranch);
+router.post("/", authMiddlewareJWT, createBranch);
 router.get("/", getAllBranches);
 router.get("/:id", getBranchById);
 router.put("/:id", updateBranch);

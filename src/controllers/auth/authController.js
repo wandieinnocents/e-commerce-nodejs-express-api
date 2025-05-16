@@ -68,7 +68,12 @@ const login = async (req, res) => {
             });
         }
 
-        const token = jwt.sign({ email: user.email, username: user.username }, secret, {});
+        // const token = jwt.sign({ email: user.email, username: user.username }, secret, {});
+        const token = jwt.sign(
+            { id: user._id, email: user.email, username: user.username },
+            secret,
+            { expiresIn: '1h' } // optional but recommended
+        );
         return successResponse(res, {
             message: "Login successful",
             data: {
