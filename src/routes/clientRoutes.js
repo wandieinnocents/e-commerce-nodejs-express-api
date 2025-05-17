@@ -6,13 +6,14 @@ const {
   updateClient,
   deleteClient,
 } = require("../controllers/client/clientController");
+const authMiddlewareJWT = require('../middlewares/auth/authMiddleware');
 
 const router = express.Router();
 
-router.post("/", createClient,);
-router.get("/", getAllClients);
-router.get("/:id", getClientById);
-router.put("/:id", updateClient);
-router.delete("/:id", deleteClient,);
+router.post("/", authMiddlewareJWT, createClient,);
+router.get("/", authMiddlewareJWT, getAllClients);
+router.get("/:id", authMiddlewareJWT, getClientById);
+router.put("/:id", authMiddlewareJWT, updateClient);
+router.delete("/:id", authMiddlewareJWT, deleteClient,);
 
 module.exports = router;
