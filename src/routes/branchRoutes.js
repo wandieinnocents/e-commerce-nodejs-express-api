@@ -12,9 +12,9 @@ const authMiddlewareJWT = require('../middlewares/auth/authMiddleware');
 const router = express.Router();
 
 router.post("/", authMiddlewareJWT, createBranch);
-router.get("/", getAllBranches);
-router.get("/:id", getBranchById);
-router.put("/:id", updateBranch);
-router.delete("/:id", deleteBranch);
+router.get("/", authMiddlewareJWT, getAllBranches);
+router.get("/:id", authMiddlewareJWT, getBranchById);
+router.put("/:id", authMiddlewareJWT, updateBranch);
+router.delete("/:id", authMiddlewareJWT, deleteBranch);
 
 module.exports = router;

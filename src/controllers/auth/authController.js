@@ -72,7 +72,7 @@ const login = async (req, res) => {
         const token = jwt.sign(
             { id: user._id, email: user.email, username: user.username },
             secret,
-            { expiresIn: '1h' } // optional but recommended
+            { expiresIn: '10h' } // token expires in
         );
         return successResponse(res, {
             message: "Login successful",
@@ -81,7 +81,6 @@ const login = async (req, res) => {
                 user
             }
         });
-
     } catch (error) {
         // Handle validation errors
         if (error.isJoi) {

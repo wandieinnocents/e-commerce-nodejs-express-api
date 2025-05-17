@@ -49,9 +49,14 @@ const createSupplier = async (req, res) => {
         const formattedId = String(newId).padStart(5, '0');
         const supplier_code = `SUPL-${formattedId}`;
 
+        // Get logged-in user
+        const logged_in_user = req.user._id;
+        //console.log("Logged in user ID:", logged_in_user);
+
         const newSupplier = await Supplier.create(
             {
-                supplier_code, supplier_name, supplier_email, supplier_phone, supplier_city, supplier_address, supplier_country, supplier_organization, supplier_status, supplier_description, supplier_website_url, supplier_image, created_by, updated_by
+                supplier_code, supplier_name, supplier_email, supplier_phone, supplier_city, supplier_address, supplier_country, supplier_organization, supplier_status, supplier_description, supplier_website_url, supplier_image,
+                created_by: logged_in_user, updated_by: null
             });
 
         return createdResponse(res, {

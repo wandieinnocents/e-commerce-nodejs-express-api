@@ -65,7 +65,12 @@ const createBranch = async (req, res) => {
 // get all branches
 const getAllBranches = async (req, res) => {
     try {
-        const branches = await Branch.find();
+        // const branches = await Branch.find();
+        // const branch = await Branch.findById(id);
+        const branches = await Branch.find()
+            .populate('created_by', 'username email')   // populate created_by user fields
+            .populate('updated_by', 'username email');  // populate updated_by user fields
+
         const branches_count = await Branch.countDocuments();
         //if no branches found
         if (!branches || branches.length === 0) {
