@@ -49,9 +49,14 @@ const createSupplier = async (req, res) => {
         const formattedId = String(newId).padStart(5, '0');
         const supplier_code = `SUPL-${formattedId}`;
 
+        // Get logged-in user
+        const logged_in_user = req.user._id;
+        //console.log("Logged in user ID:", logged_in_user);
+
         const newSupplier = await Supplier.create(
             {
-                supplier_code, supplier_name, supplier_email, supplier_phone, supplier_city, supplier_address, supplier_country, supplier_organization, supplier_status, supplier_description, supplier_website_url, supplier_image, created_by, updated_by
+                supplier_code, supplier_name, supplier_email, supplier_phone, supplier_city, supplier_address, supplier_country, supplier_organization, supplier_status, supplier_description, supplier_website_url, supplier_image,
+                created_by: logged_in_user, updated_by: null
             });
 
         return createdResponse(res, {
@@ -68,7 +73,10 @@ const createSupplier = async (req, res) => {
 // get all suppliers
 const getAllSuppliers = async (req, res) => {
     try {
-        const suppliers = await Supplier.find();
+        // const suppliers = await Supplier.find();
+        const suppliers = await Supplier.find()
+            .populate('created_by', 'username email')   // populate created_by user fields
+            .populate('updated_by', 'username email');  // populate updated_by user fields
         const suppliers_count = await Supplier.countDocuments();
 
         //if no suppliers found
@@ -101,16 +109,16 @@ const getSupplierById = async (req, res) => {
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        // return res.status(400).json({ message: "Invalid supplier ID format" });
         return badRequestResponse(res, {
             message: "Invalid supplier ID format",
         });
     }
 
     try {
-        const supplier = await Supplier.findById(id);
+        const supplier = await Supplier.findById(id)
+            .populate('created_by', 'username email')   // populate created_by user fields
+            .populate('updated_by', 'username email');  // populate updated_by user fields
         if (!supplier) {
-            // return res.status(404).json({ message: "Supplier not found" });
             return notFoundResponse(res, {
                 message: "Supplier not found",
             });
@@ -134,7 +142,6 @@ const updateSupplier = async (req, res) => {
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        // return res.status(400).json({ message: "Invalid supplier ID format" });
         return badRequestResponse(res, {
             message: "Invalid supplier ID format",
         });
@@ -169,10 +176,13 @@ const updateSupplier = async (req, res) => {
             }
         }
 
+        const logged_in_user = req.user._id;
+
         // Proceed to update
         const supplier = await Supplier.findByIdAndUpdate(id,
             {
-                supplier_name, supplier_email, supplier_phone, supplier_city, supplier_address, supplier_country, supplier_organization, supplier_status, supplier_description, supplier_website_url, supplier_image, created_by, updated_by
+                supplier_name, supplier_email, supplier_phone, supplier_city, supplier_address, supplier_country, supplier_organization, supplier_status, supplier_description,
+                supplier_website_url, supplier_image, created_by: logged_in_user, updated_by: logged_in_user
             },
             {
                 new: true,
@@ -181,7 +191,6 @@ const updateSupplier = async (req, res) => {
         );
 
         if (!supplier) {
-            // return res.status(404).json({ message: "Supplier not found" });
             return notFoundResponse(res, {
                 message: "Supplier not found",
             });
@@ -206,7 +215,6 @@ const deleteSupplier = async (req, res) => {
     const { id } = req.params;
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        // return res.status(400).json({ message: "Invalid supplier ID format" });
         return badRequestResponse(res, {
             message: "Invalid supplier ID format",
         });
@@ -215,7 +223,6 @@ const deleteSupplier = async (req, res) => {
     try {
         const supplier = await Supplier.findByIdAndDelete(id);
         if (!supplier) {
-            // return res.status(404).json({ message: "Supplier not found" });
             return notFoundResponse(res, {
                 message: "Supplier not found",
             });

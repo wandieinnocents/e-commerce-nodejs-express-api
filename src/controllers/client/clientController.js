@@ -49,9 +49,14 @@ const createClient = async (req, res) => {
         const formattedId = String(newId).padStart(5, '0');
         const client_code = `CLI-${formattedId}`;
 
+        //logged in user
+        const logged_in_user_id = req.user._id;
+
+        // Create new client
         const newClient = await Client.create(
             {
-                client_code, first_name, last_name, other_names, age, email, profession, phone, country_id, address, website, client_status, organization, client_photo, description, created_by, updated_by
+                client_code, first_name, last_name, other_names, age, email, profession, phone, country_id, address, website, client_status, organization, client_photo,
+                description, created_by: logged_in_user_id, updated_by: null
             });
 
         // response
@@ -69,7 +74,15 @@ const createClient = async (req, res) => {
 // get all clients
 const getAllClients = async (req, res) => {
     try {
-        const clients = await Client.find();
+        // const clients = await Client.find();
+        // const clients = await Client.find().
+        //     populate('created_by', 'first_name last_name').
+        //     populate('updated_by', 'first_name last_name');
+
+        const clients = await Client.find()
+            .populate('created_by', 'username email')   // populate created_by user fields
+            .populate('updated_by', 'username email');  // populate updated_by user fields
+
         const client_count = await Client.countDocuments();
 
         //if no clients found
@@ -106,7 +119,11 @@ const getClientById = async (req, res) => {
     }
 
     try {
-        const client = await Client.findById(id);
+        // const client = await Client.findById(id);
+        const client = await Client.findById(id).
+            populate('created_by', 'username email').
+            populate('updated_by', 'username email');
+
         if (!client) {
             return notFoundResponse(res, {
                 message: "Client not found",
@@ -168,11 +185,15 @@ const updateClient = async (req, res) => {
             }
         }
 
+        //logged in user
+        const logged_in_user_id = req.user._id;
+
         // Proceed to update
         const client = await Client.findByIdAndUpdate(
             id,
             {
-                first_name, last_name, other_names, age, email, profession, phone, country_id, address, website, client_status, organization, client_photo, description, created_by, updated_by
+                first_name, last_name, other_names, age, email, profession, phone, country_id, address, website, client_status, organization, client_photo,
+                description, created_by: logged_in_user_id, updated_by: logged_in_user_id
             },
             {
                 new: true,

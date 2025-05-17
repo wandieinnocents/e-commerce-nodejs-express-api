@@ -13,12 +13,22 @@ const clientSchema = new mongoose.Schema({
     country_id: { type: Number, default: null },
     address: { type: String, default: null },
     website: { type: String, default: null },
-    client_status: { type: Number, default: null },
+    client_status: {
+        type: Number,
+        enum: [0, 1], //0 = Inactive, 1 = Activer
+        default: 1
+    },
     organization: { type: String, default: null },
     client_photo: { type: String, default: null },
     description: { type: String, default: null },
-    created_by: { type: Number, default: null },
-    updated_by: { type: Number, default: null }
+    created_by: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
+    updated_by: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }
 },
     {
         timestamps: true,
