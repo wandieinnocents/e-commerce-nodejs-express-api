@@ -75,10 +75,6 @@ const createClient = async (req, res) => {
 const getAllClients = async (req, res) => {
     try {
         // const clients = await Client.find();
-        // const clients = await Client.find().
-        //     populate('created_by', 'first_name last_name').
-        //     populate('updated_by', 'first_name last_name');
-
         const clients = await Client.find()
             .populate('created_by', 'username email')   // populate created_by user fields
             .populate('updated_by', 'username email');  // populate updated_by user fields

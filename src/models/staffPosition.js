@@ -9,7 +9,8 @@ const staffPositionSchema = new mongoose.Schema({
     },
     status: {
         type: Number,
-        default: null
+        enum: [0, 1], //0 = Inactive, 1 = Activer
+        default: 1
     },
     created_by: {
         type: mongoose.Schema.Types.ObjectId,
@@ -19,7 +20,7 @@ const staffPositionSchema = new mongoose.Schema({
     updated_by: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false
     }
 }, { timestamps: true });
 

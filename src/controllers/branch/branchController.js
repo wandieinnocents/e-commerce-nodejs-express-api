@@ -185,7 +185,7 @@ const updateBranch = async (req, res) => {
 
         // response
         return successResponse(res, {
-            message: "Branches retrieved successfully",
+            message: "Branch updated successfully",
             data: branch
         });
     } catch (error) {

@@ -3,7 +3,6 @@ const Supplier = require('../../models/Supplier');
 const { supplierSchemaValidation } = require('../../validations/supplier/supplierValidations');
 const { createdResponse, successResponse, updatedResponse, serverErrorResponse, unauthorizedResponse, notFoundResponse, badRequestResponse } = require('../../utils/responseHandler');
 
-
 // create supplier
 const createSupplier = async (req, res) => {
     try {
