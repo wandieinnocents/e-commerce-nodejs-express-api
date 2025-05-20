@@ -4,7 +4,7 @@ const {
     getAllBrands,
     getBrandById,
     updateBrand,
-    // deleteBranch,
+    deleteBrand,
 } = require("../controllers/brand/brandController");
 
 const authMiddlewareJWT = require('../middlewares/auth/authMiddleware');
@@ -15,6 +15,6 @@ router.post("/", authMiddlewareJWT, createBrand);
 router.get("/", authMiddlewareJWT, getAllBrands);
 router.get("/:id", authMiddlewareJWT, getBrandById);
 router.put("/:id", authMiddlewareJWT, updateBrand);
-// router.delete("/:id", authMiddlewareJWT, deleteBranch);
+router.delete("/:id", authMiddlewareJWT, deleteBrand);
 
 module.exports = router;

@@ -209,48 +209,50 @@ const updateBrand = async (req, res) => {
     }
 }
 
-// //delete brand
-// const deleteBranch = async (req, res) => {
-//     const { id } = req.params;
+//delete brand
+const deleteBrand = async (req, res) => {
+    const { id } = req.params;
 
-//     // Validate ID format
-//     if (!mongoose.Types.ObjectId.isValid(id)) {
-//         return badRequestResponse(res, {
-//             message: "Invalid brand ID format",
-//         });
-//     }
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return badRequestResponse(res, {
+            message: "Invalid brand ID format",
+        });
+    }
 
-//     try {
-//         const brand = await Brand.findByIdAndDelete(id);
-//         if (!brand) {
-//             return notFoundResponse(res, {
-//                 message: "Brand not found",
-//             });
-//         }
-//         // response
-//         return successResponse(res, {
-//             message: "Brand deleted successfully",
-//             data: brand
-//         });
+    try {
+        const brand = await Brand.findByIdAndDelete(id);
+        if (!brand) {
+            return notFoundResponse(res, {
+                message: "Brand not found",
+            });
+        }
+        // response
+        return successResponse(res, {
+            message: "Brand deleted successfully",
+            data: brand
+        });
 
-//     } catch (error) {
-//joi validation errors
-// if (error.isJoi) {
-//     return badRequestResponse(res, {
-//         message: error.details[0].message
-//     });
-// }
-//         return serverErrorResponse(res, {
-//             error: error.message
-//         });
-//     }
-// };
+    } catch (error) {
+        // joi validation errors 
+        if (error.isJoi) {
+            return badRequestResponse(res, {
+                message: error.details[0].message
+            });
+        }
+
+        //handle other errors
+        return serverErrorResponse(res, {
+            error: error.message
+        });
+    }
+};
 
 module.exports = {
     createBrand,
     getAllBrands,
     getBrandById,
     updateBrand,
-    // deleteBranch,
+    deleteBrand,
 };
 
