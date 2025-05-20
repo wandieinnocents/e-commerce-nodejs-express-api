@@ -8,6 +8,7 @@ const branchRoutes = require("./src/routes/branchRoutes");
 const supplierRoutes = require("./src/routes/supplierRoutes");
 const clientRoutes = require("./src/routes/clientRoutes");
 const staffPositionRoutes = require('./src/routes/staffPositionRoutes');
+const brandRoutes = require('./src/routes/brandRoutes');
 
 dotenv.config();
 const app = express();
@@ -27,6 +28,7 @@ app.use("/api/branches", branchRoutes);
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/staff_positions", staffPositionRoutes);
+app.use("/api/brands", brandRoutes);
 
 const port = process.env.PORT;
 app.listen(port, () => {

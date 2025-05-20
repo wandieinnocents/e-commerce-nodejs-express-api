@@ -4,11 +4,6 @@ const userSchema = new mongoose.Schema({
     username: { type: String, unique: true, required: true },
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
-    // created_by: { type: Number, required: true, },
-    // updated_by: { type: Number, required: true, }
-
-    //    username: { type: String, unique: true, required: true },
-    //     email: { type: String, unique: true, required: true },
     //     first_name: { type: String, required: true },
     //     last_name: { type: String, required: true },
     //     other_names: { type: String, default: null },
