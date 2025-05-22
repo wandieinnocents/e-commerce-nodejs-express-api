@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const parentProductCategory = require('../../models/parentProductCategory');
 const { createdResponse, successResponse, updatedResponse, serverErrorResponse, unauthorizedResponse, notFoundResponse, badRequestResponse } = require('../../utils/responseHandler');
 const { storeParentProductCategoryValidation } = require('../../validations/parentProductCategory/parentProductCategoryValidation');
-// const { updateParentProductCategoryValidation } = require('../../validations/parentProductCategory/parentProductCategoryValidations');
+const { updateParentProductCategoryValidation } = require('../../validations/parentProductCategory/parentProductCategoryValidation');
 
 // create parent product category
 const createParentProductCategory = async (req, res) => {
@@ -100,159 +100,156 @@ const getAllParentProductCategories = async (req, res) => {
     }
 };
 
-// //get parent_product_category by id
-// const getBrandById = async (req, res) => {
-//     const { id } = req.params;
-//     // Validate ID format
-//     if (!mongoose.Types.ObjectId.isValid(id)) {
-//         return badRequestResponse(res, {
-//             message: "Invalid parent_product_category ID format",
-//         });
-//     }
+//get parent_product_category by id
+const getParentProductCategoryById = async (req, res) => {
+    const { id } = req.params;
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return badRequestResponse(res, {
+            message: "Invalid parent product category ID format",
+        });
+    }
 
-//     try {
-//         // const parent_product_category = await parentProductCategory.findById(id);
-//         const parent_product_category = await parentProductCategory.findById(id)
-//             .populate('created_by', 'username email')   // populate created_by user fields
-//             .populate('updated_by', 'username email');  // populate updated_by user fields
+    try {
+        const parent_product_category = await parentProductCategory.findById(id)
+            .populate('created_by', 'username email')   // populate created_by user fields
+            .populate('updated_by', 'username email');  // populate updated_by user fields
 
+        if (!parent_product_category) {
+            return notFoundResponse(res, {
+                message: "Parent product category not found",
+            });
+        }
 
-//         if (!parent_product_category) {
-//             return notFoundResponse(res, {
-//                 message: "parentProductCategory not found",
-//             });
-//         }
+        //success response
+        return successResponse(res, {
+            message: "Parent product category retrieved successfully",
+            data: parent_product_category
+        });
 
-//         //success response
-//         return successResponse(res, {
-//             message: "parentProductCategory retrieved successfully",
-//             data: parent_product_category
-//         });
+    } catch (error) {
+        //joi validation errors
+        if (error.isJoi) {
+            return badRequestResponse(res, {
+                message: error.details[0].message
+            });
+        }
+        // Handle other errors
+        return serverErrorResponse(res, {
+            error: error.message
+        });
+    }
+};
 
-//     } catch (error) {
-//         //joi validation errors
-//         if (error.isJoi) {
-//             return badRequestResponse(res, {
-//                 message: error.details[0].message
-//             });
-//         }
-//         // Handle other errors
-//         return serverErrorResponse(res, {
-//             error: error.message
-//         });
-//     }
-// };
+//update parent_product_category 
+const updateParentProductCategory = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const validatedData = await updateParentProductCategoryValidation.validateAsync(req.body);
+        const { parent_product_category_name, parent_product_category_status, created_by, updated_by } = validatedData;
 
-// //update parent_product_category 
-// const updateBrand = async (req, res) => {
-//     const { id } = req.params;
-//     try {
-//         const validatedData = await updateParentProductCategoryValidation.validateAsync(req.body);
-//         const { parent_product_category_name, brand_register_date, brand_status, brand_description, brand_image, created_by, updated_by } = validatedData;
+        // Validate ID format
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return badRequestResponse(res, {
+                message: "Invalid parent_product_category ID format",
+            });
+        }
 
-//         // Validate ID format
-//         if (!mongoose.Types.ObjectId.isValid(id)) {
-//             return badRequestResponse(res, {
-//                 message: "Invalid parent_product_category ID format",
-//             });
-//         }
+        // Check for uniqueness of fields
+        const existing = await parentProductCategory.findOne({
+            // Exclude the current parent_product_category from the search
+            _id: { $ne: id },
+            $or: [
+                { parent_product_category_name },
+            ]
+        });
 
+        if (existing) {
+            if (existing.parent_product_category_name === parent_product_category_name) {
+                return unauthorizedResponse(res, {
+                    message: "Parent product category with this name  already exists"
+                });
+            }
+        }
 
-//         // Check for uniqueness of fields
-//         const existingBrand = await parentProductCategory.findOne({
-//             // Exclude the current parent_product_category from the search
-//             _id: { $ne: id },
-//             $or: [
-//                 { parent_product_category_name },
-//             ]
-//         });
+        // Get logged-in user
+        const logged_in_user = req.user._id;
 
-//         if (existingBrand) {
-//             if (existingBrand.parent_product_category_name === parent_product_category_name) {
-//                 return unauthorizedResponse(res, {
-//                     message: "parentProductCategory with this name  already exists"
-//                 });
-//             }
-//         }
+        // Update the parent_product_category
+        const parent_product_category = await parentProductCategory.findByIdAndUpdate(id, {
+            parent_product_category_name, parent_product_category_status,
+            created_by: logged_in_user, updated_by: logged_in_user
+        }, { new: true });
 
-//         // Get logged-in user
-//         const logged_in_user = req.user._id;
+        if (!parent_product_category) {
+            return notFoundResponse(res, {
+                message: "Parent product category not found",
+            });
+        }
 
-//         // Update the parent_product_category
-//         const parent_product_category = await parentProductCategory.findByIdAndUpdate(id, {
-//             parent_product_category_name, brand_register_date, brand_status, brand_description, brand_image,
-//             created_by: logged_in_user, updated_by: logged_in_user
-//         }, { new: true });
+        // response
+        return successResponse(res, {
+            message: "Parent product category updated successfully",
+            data: parent_product_category
+        });
+    } catch (error) {
 
-//         if (!parent_product_category) {
-//             return notFoundResponse(res, {
-//                 message: "parentProductCategory not found",
-//             });
-//         }
+        // joi validation errors
+        if (error.isJoi) {
+            return badRequestResponse(res, {
+                message: error.details[0].message
+            });
+        }
+        return serverErrorResponse(res, {
+            error: error.message
+        });
+    }
+}
 
-//         // response
-//         return successResponse(res, {
-//             message: "parentProductCategory updated successfully",
-//             data: parent_product_category
-//         });
-//     } catch (error) {
+//delete parent_product_category
+const deleteParentProductCategory = async (req, res) => {
+    const { id } = req.params;
 
-//         // joi validation errors
-//         if (error.isJoi) {
-//             return badRequestResponse(res, {
-//                 message: error.details[0].message
-//             });
-//         }
-//         return serverErrorResponse(res, {
-//             error: error.message
-//         });
-//     }
-// }
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return badRequestResponse(res, {
+            message: "Invalid Parent product category ID format",
+        });
+    }
 
-// //delete parent_product_category
-// const deleteBrand = async (req, res) => {
-//     const { id } = req.params;
+    try {
+        const parent_product_category = await parentProductCategory.findByIdAndDelete(id);
+        if (!parent_product_category) {
+            return notFoundResponse(res, {
+                message: "Parent product category not found",
+            });
+        }
+        // response
+        return successResponse(res, {
+            message: "Parent product category deleted successfully",
+            data: parent_product_category
+        });
 
-//     // Validate ID format
-//     if (!mongoose.Types.ObjectId.isValid(id)) {
-//         return badRequestResponse(res, {
-//             message: "Invalid parent_product_category ID format",
-//         });
-//     }
+    } catch (error) {
+        // joi validation errors 
+        if (error.isJoi) {
+            return badRequestResponse(res, {
+                message: error.details[0].message
+            });
+        }
 
-//     try {
-//         const parent_product_category = await parentProductCategory.findByIdAndDelete(id);
-//         if (!parent_product_category) {
-//             return notFoundResponse(res, {
-//                 message: "parentProductCategory not found",
-//             });
-//         }
-//         // response
-//         return successResponse(res, {
-//             message: "parentProductCategory deleted successfully",
-//             data: parent_product_category
-//         });
-
-//     } catch (error) {
-//         // joi validation errors 
-//         if (error.isJoi) {
-//             return badRequestResponse(res, {
-//                 message: error.details[0].message
-//             });
-//         }
-
-//         //handle other errors
-//         return serverErrorResponse(res, {
-//             error: error.message
-//         });
-//     }
-// };
+        //handle other errors
+        return serverErrorResponse(res, {
+            error: error.message
+        });
+    }
+};
 
 module.exports = {
     createParentProductCategory,
     getAllParentProductCategories,
-    // getBrandById,
-    // updateBrand,
-    // deleteBrand,
+    getParentProductCategoryById,
+    updateParentProductCategory,
+    deleteParentProductCategory,
 };
 
