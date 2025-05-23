@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
 const productSchema = new mongoose.Schema({
     product_code: { type: String, required: true },
@@ -7,7 +8,7 @@ const productSchema = new mongoose.Schema({
     brand_id: { type: Schema.Types.ObjectId, ref: 'Brand', required: true },
     branch_id: { type: Schema.Types.ObjectId, ref: 'Branch', required: true },
     parent_product_category_id: { type: Schema.Types.ObjectId, ref: 'parentProductCategory', required: true },
-    product_category_id: { type: Schema.Types.ObjectId, ref: 'ProductCategory', required: true },
+    product_category_id: { type: Schema.Types.ObjectId, ref: 'productCategory', required: true },
     unit_id: { type: Schema.Types.ObjectId, ref: 'Unit', required: true }, //handle its api first
     product_created_date: { type: Date, default: Date.now },
     product_expiry_date: { type: Date, default: null },

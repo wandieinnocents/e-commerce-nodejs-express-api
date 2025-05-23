@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-// store branch validation
+// store unit validation
 const storeUnitValidation = Joi.object({
     name: Joi.string().trim().required().messages({
         'any.required': 'Unit name is required',
@@ -17,7 +17,7 @@ const storeUnitValidation = Joi.object({
     }),
 }).strict().unknown(false);
 
-// update branch validation
+// update unit validation
 const updateUnitValidation = Joi.object({
     name: Joi.string().trim().required().messages({
         'any.required': 'Unit name is required',
