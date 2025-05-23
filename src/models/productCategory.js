@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const ProductCategorySchema = new Schema({
     parent_product_category_id: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'parentProductCategory', // relationship with parentProductCategory
         required: true
     },
@@ -21,11 +21,13 @@ const ProductCategorySchema = new Schema({
         default: 1
     },
     created_by: {
-        type: Number,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         default: null
     },
     updated_by: {
-        type: Number,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         default: null
     }
 }, {
