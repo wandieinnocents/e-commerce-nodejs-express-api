@@ -1,10 +1,10 @@
 const express = require("express");
 const {
     createProductCategory,
-    // getAllParentProductCategories,
-    // getParentProductCategoryById,
-    // updateParentProductCategory,
-    // deleteParentProductCategory,
+    getAllProductCategories,
+    getProductCategoryById,
+    updateProductCategory,
+    deleteProductCategory,
 } = require("../controllers/ProductCategory/ProductCategoryController");
 
 const authMiddlewareJWT = require('../middlewares/auth/authMiddleware');
@@ -12,9 +12,9 @@ const authMiddlewareJWT = require('../middlewares/auth/authMiddleware');
 const router = express.Router();
 
 router.post("/", authMiddlewareJWT, createProductCategory);
-// router.get("/", authMiddlewareJWT, getAllParentProductCategories);
-// router.get("/:id", authMiddlewareJWT, getParentProductCategoryById);
-// router.put("/:id", authMiddlewareJWT, updateParentProductCategory);
-// router.delete("/:id", authMiddlewareJWT, deleteParentProductCategory);
+router.get("/", authMiddlewareJWT, getAllProductCategories);
+router.get("/:id", authMiddlewareJWT, getProductCategoryById);
+router.put("/:id", authMiddlewareJWT, updateProductCategory);
+router.delete("/:id", authMiddlewareJWT, deleteProductCategory);
 
 module.exports = router;

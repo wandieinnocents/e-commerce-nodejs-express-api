@@ -2,8 +2,7 @@ const Joi = require('joi');
 
 // store 
 const storeProductCategoryValidation = Joi.object({
-    parent_product_category_id: Joi.string().length(24).required(),
-
+    parent_product_category_id: Joi.string().required(),
     product_category_name: Joi.string().trim().required().messages({
         'any.required': 'Product category name is required',
         'string.empty': 'Product category name cannot be empty',
@@ -21,9 +20,7 @@ const storeProductCategoryValidation = Joi.object({
 
 // update 
 const updateProductCategoryValidation = Joi.object({
-    parent_product_category_id: Joi.number().integer().optional().messages({
-        'any.required': 'Parent product category  is required',
-    }),
+    parent_product_category_id: Joi.string().required(),
     product_category_name: Joi.string().trim().required().messages({
         'any.required': 'Product category name is required',
         'string.empty': 'Product category name cannot be empty',
