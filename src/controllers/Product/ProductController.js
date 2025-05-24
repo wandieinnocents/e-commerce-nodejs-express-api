@@ -275,13 +275,64 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-const getByCategory = async (req, res) => {
-  const { category } = req.params;
+// const getByCategory = async (req, res) => {
+//   const { category } = req.params;
+//   try {
+//     const products = await Product.find({ category });
+//     res.status(200).json(products);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+// get products by category_id
+const getProductsByCategoryId = async (req, res) => {
   try {
-    const products = await Product.find({ category });
-    res.status(200).json(products);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const {
+      category
+    } = req.params; // Assuming category_id is passed as a URL parameter
+
+    const products = await Product.find({
+      product_category_id: category
+    })
+      .populate('created_by', 'username email') // populate created_by user fields
+      .populate('updated_by', 'username email') // populate updated_by user fields
+      .populate('parent_product_category_id', 'parent_product_category_name')
+      .populate('product_category_id', 'product_category_name')
+      .populate('supplier_id', 'supplier_name')
+      .populate('brand_id', 'brand_name')
+      .populate('branch_id', 'branch_name')
+      .populate('unit_id', 'name');
+
+    const products_count = await Product.countDocuments({
+      product_category_id: category
+    });
+
+    // If no products found for the given category
+    if (!products || products.length === 0) {
+      return notFoundResponse(res, {
+        message: "No products found for this category.",
+      });
+    }
+
+    return successResponse(res, {
+      message: "Products retrieved successfully for the specified category",
+      records_count: products_count,
+      data: products
+    });
+
+  } catch (error) {
+    // Handle validation errors
+    if (error.isJoi) {
+      return badRequestResponse(res, {
+        message: error.details[0].message
+      });
+    }
+
+    // Handle other errors
+    return serverErrorResponse(res, {
+      error: error.message
+    });
   }
 };
 
@@ -291,5 +342,5 @@ module.exports = {
   getProductById,
   updateProduct,
   deleteProduct,
-  getByCategory
+  getProductsByCategoryId
 };
