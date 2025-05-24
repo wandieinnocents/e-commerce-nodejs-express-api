@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./src/config/db");
 
 const authRoutes = require("./src/routes/authRoutes");
-const productRoutes = require("./src/routes/productRoutes");
+const productRoutes = require("./src/routes/ProductRoutes");
 const branchRoutes = require("./src/routes/branchRoutes");
 const supplierRoutes = require("./src/routes/supplierRoutes");
 const clientRoutes = require("./src/routes/clientRoutes");
