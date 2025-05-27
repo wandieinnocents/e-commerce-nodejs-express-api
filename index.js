@@ -12,10 +12,13 @@ const brandRoutes = require('./src/routes/brandRoutes');
 const parentProductCategoryRoutes = require('./src/routes/parentProductCategoryRoutes');
 const productCategoryRoutes = require('./src/routes/ProductCategoryRoutes');
 const UnitRoutes = require('./src/routes/UnitRoutes');
+const cors = require('cors');
 
 dotenv.config();
 const app = express();
 app.use(express.json());
+//enable cors
+app.use(cors());
 
 // DB Connection
 connectDB();

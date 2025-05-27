@@ -4,7 +4,7 @@ const userSchemaValidation = Joi.object({
     username: Joi.string().trim().min(3).max(30).required()
         .messages({
             'string.base': 'Username must be a string',
-            'string.empty': 'Username is required',
+            'string.empty': 'Username cannot be empty',
             'string.min': 'Username must be at least 3 characters',
             'any.required': 'Username is required',
         }),
@@ -13,6 +13,7 @@ const userSchemaValidation = Joi.object({
         .messages({
             'string.email': 'Email must be a valid email address',
             'any.required': 'Email is required',
+            'string.empty': 'Email cannot be empty',
         }),
     created_by: Joi.number().integer().optional().messages({
         'number.base': 'Created by must be a number',

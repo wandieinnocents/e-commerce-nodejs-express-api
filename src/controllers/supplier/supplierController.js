@@ -181,7 +181,7 @@ const updateSupplier = async (req, res) => {
         const supplier = await Supplier.findByIdAndUpdate(id,
             {
                 supplier_name, supplier_email, supplier_phone, supplier_city, supplier_address, supplier_country, supplier_organization, supplier_status, supplier_description,
-                supplier_website_url, supplier_image, created_by: logged_in_user, updated_by: logged_in_user
+                supplier_website_url, supplier_image, created_by, updated_by: logged_in_user
             },
             {
                 new: true,

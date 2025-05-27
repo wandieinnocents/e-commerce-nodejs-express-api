@@ -181,7 +181,7 @@ const updateBrand = async (req, res) => {
         // Update the brand
         const brand = await Brand.findByIdAndUpdate(id, {
             brand_name, brand_register_date, brand_status, brand_description, brand_image,
-            created_by: logged_in_user, updated_by: logged_in_user
+            created_by, updated_by: logged_in_user
         }, { new: true });
 
         if (!brand) {
