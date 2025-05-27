@@ -5,16 +5,18 @@ const {
   getProductById,
   updateProduct,
   deleteProduct,
-  getByCategory
-} = require("../controllers/productController");
+  getProductsByCategoryId
+} = require("../controllers/Product/ProductController");
+
+const authMiddlewareJWT = require('../middlewares/auth/authMiddleware');
 
 const router = express.Router();
 
-router.post("/", createProduct);
-router.get("/", getAllProducts);
-router.get("/:id", getProductById);
-router.put("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
-router.get("/category/:category", getByCategory);
+router.post("/", authMiddlewareJWT, createProduct);
+router.get("/", authMiddlewareJWT, getAllProducts);
+router.get("/:id", authMiddlewareJWT, getProductById);
+router.put("/:id", authMiddlewareJWT, updateProduct);
+router.delete("/:id", authMiddlewareJWT, deleteProduct);
+router.get("/category/:category", authMiddlewareJWT, getProductsByCategoryId);
 
 module.exports = router;

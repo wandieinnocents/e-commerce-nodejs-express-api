@@ -35,9 +35,10 @@ const register = async (req, res) => {
         });
 
     } catch (error) {
+        console.log("Error in register:", error);
         // Handle validation errors
         if (error.isJoi) {
-            return badRequestResponse(res, {
+            return serverErrorResponse(res, {
                 message: error.details[0].message
             });
         }

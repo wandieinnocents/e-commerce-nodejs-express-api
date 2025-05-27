@@ -178,7 +178,7 @@ const updateParentProductCategory = async (req, res) => {
         // Update the parent_product_category
         const parent_product_category = await parentProductCategory.findByIdAndUpdate(id, {
             parent_product_category_name, parent_product_category_status,
-            created_by: logged_in_user, updated_by: logged_in_user
+            created_by, updated_by: logged_in_user
         }, { new: true });
 
         if (!parent_product_category) {

@@ -174,7 +174,7 @@ const updateBranch = async (req, res) => {
         // Update the branch
         const branch = await Branch.findByIdAndUpdate(id, {
             branch_name, branch_status, branch_address,
-            created_by: logged_in_user, updated_by: logged_in_user
+            created_by, updated_by: logged_in_user
         }, { new: true });
 
         if (!branch) {
