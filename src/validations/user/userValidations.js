@@ -1,5 +1,6 @@
 const Joi = require('joi');
 
+//register validation 
 const userSchemaValidation = Joi.object({
     username: Joi.string().trim().min(3).max(30).required()
         .messages({
@@ -28,5 +29,23 @@ const userSchemaValidation = Joi.object({
         })
 });
 
+//login validation 
+const userLoginSchemaValidation = Joi.object({
+    email: Joi.string().trim().email().required()
+        .messages({
+            'string.email': 'Email must be a valid email address',
+            'any.required': 'Email is required',
+            'string.empty': 'Email cannot be empty',
+        }),
 
-module.exports = { userSchemaValidation };
+    password: Joi.string().min(6).required()
+        .messages({
+            'string.min': 'Password must be at least 6 characters',
+            'any.required': 'Password is required',
+        })
+});
+
+
+
+
+module.exports = { userSchemaValidation, userLoginSchemaValidation };

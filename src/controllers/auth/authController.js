@@ -2,7 +2,7 @@ const User = require("../../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { createdResponse, successResponse, updatedResponse, serverErrorResponse, unauthorizedResponse, notFoundResponse, badRequestResponse } = require('../../utils/responseHandler');
-const { userSchemaValidation } = require('../../validations/user/userValidations');
+const { userSchemaValidation, userLoginSchemaValidation } = require('../../validations/user/userValidations');
 
 //register user
 const register = async (req, res) => {
@@ -52,9 +52,13 @@ const register = async (req, res) => {
 
 
 const login = async (req, res) => {
-    const { email, password } = req.body;
+    // const { email, password } = req.body;
+
     const secret = process.env.TOKEN_SECRET;
     try {
+
+        const { email, password } = await userLoginSchemaValidation.validateAsync(req.body);
+
         const user = await User.findOne({ email });
         if (!user) {
             return notFoundResponse(res, {
@@ -75,6 +79,8 @@ const login = async (req, res) => {
             secret,
             { expiresIn: '10h' } // token expires in
         );
+
+        console.log("Token generated:", token);
         return successResponse(res, {
             message: "Login successful",
             data: {
@@ -83,9 +89,10 @@ const login = async (req, res) => {
             }
         });
     } catch (error) {
+        console.log("Error in register:", error);
         // Handle validation errors
         if (error.isJoi) {
-            return badRequestResponse(res, {
+            return serverErrorResponse(res, {
                 message: error.details[0].message
             });
         }
@@ -98,9 +105,18 @@ const login = async (req, res) => {
 };
 
 const logout = (req, res) => {
-    res.cookie("token", "").json({
-        message: "User Logged out successfully"
-    });
+    try {
+        // res.cookie("token", "");
+        res.clearCookie('token');
+        return successResponse(res, {
+            message: "User Logged out successfully"
+        });
+    } catch (error) {
+        return serverErrorResponse(res, {
+            message: "Error during logout",
+            error: error.message
+        });
+    }
 };
 
 module.exports = { register, login, logout };
