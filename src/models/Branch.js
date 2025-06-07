@@ -6,10 +6,10 @@ const branchSchema = new mongoose.Schema(
         branch_name: { type: String, required: true, unique: true },
         branch_status: {
             type: Number,
-            enum: [0, 1], //0 = Inactive, 1 = Activer
-            default: 1
+            default: 1,
+            required: false,
         },
-        branch_address: { type: String, default: null },
+        branch_address: { type: String, default: null , required:false},
         created_by: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',

@@ -4,6 +4,8 @@
 const successResponse = (res, {
     statusCode = 200,
     message = "Request successful.",
+    total_pages = null,
+    current_page = null,
     data = null,
     records_count = null
 }) => {
@@ -12,6 +14,8 @@ const successResponse = (res, {
         status_code: statusCode,
         timestamp: new Date().toISOString(),
         message,
+        current_page,
+        total_pages,
         ...(records_count && { records_count }),
         ...(data && { data })
     });

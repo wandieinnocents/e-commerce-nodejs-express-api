@@ -7,9 +7,6 @@ const { createdResponse, successResponse, updatedResponse, serverErrorResponse, 
 
 // create branch
 const createBranch = async (req, res) => {
-
-
-
     try {
         // Validate input
         const validatedData = await storeBranchValidation.validateAsync(req.body);
@@ -56,23 +53,76 @@ const createBranch = async (req, res) => {
             data: newBranch
         });
     } catch (error) {
-        return serverErrorResponse(res, {
-            error: error.message
-        });
+        // return serverErrorResponse(res, {
+        //     error: error.message
+        // });
+
+        if (error.isJoi) {
+            return serverErrorResponse(res, {
+                message: error.details[0].message
+            });
+        }
     }
 };
 
 // get all branches
+// const getAllBranches = async (req, res) => {
+//     try {
+//         // const branches = await Branch.find();
+//         // const branch = await Branch.findById(id);
+//         const branches = await Branch.find()
+//             .populate('created_by', 'username email')   // populate created_by user fields
+//             .populate('updated_by', 'username email');  // populate updated_by user fields
+
+//         const branches_count = await Branch.countDocuments();
+//         //if no branches found
+//         if (!branches || branches.length === 0) {
+//             return notFoundResponse(res, {
+//                 message: "No branches found",
+//             });
+//         }
+
+//         return successResponse(res, {
+//             message: "Branches retrieved successfully",
+//             records_count: branches_count,
+//             data: branches
+//         });
+
+//     } catch (error) {
+//         // Handle validation errors
+//         if (error.isJoi) {
+//             return serverErrorResponse(res, {
+//                 message: error.details[0].message
+//             });
+//         }
+
+
+//         // return serverErrorResponse(res, {
+//         //     error: error.message
+//         // });
+//     }
+// };
+
+//get all branches paginated
 const getAllBranches = async (req, res) => {
     try {
-        // const branches = await Branch.find();
-        // const branch = await Branch.findById(id);
-        const branches = await Branch.find()
-            .populate('created_by', 'username email')   // populate created_by user fields
-            .populate('updated_by', 'username email');  // populate updated_by user fields
+        // Get pagination parameters from query string
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
 
+        // Get total count of documents
         const branches_count = await Branch.countDocuments();
-        //if no branches found
+
+        // Paginated query with populate
+        const branches = await Branch.find()
+            .populate('created_by', 'username email')
+            .populate('updated_by', 'username email')
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });  // Optional: sort by latest
+
+        // If no branches found
         if (!branches || branches.length === 0) {
             return notFoundResponse(res, {
                 message: "No branches found",
@@ -81,22 +131,86 @@ const getAllBranches = async (req, res) => {
 
         return successResponse(res, {
             message: "Branches retrieved successfully",
+            current_page: page,
+            total_pages: Math.ceil(branches_count / limit),
             records_count: branches_count,
             data: branches
         });
 
     } catch (error) {
-        // Handle validation errors
         if (error.isJoi) {
-            return badRequestResponse(res, {
+            return serverErrorResponse(res, {
                 message: error.details[0].message
             });
         }
 
-
         return serverErrorResponse(res, {
-            error: error.message
+            message: error.message
         });
+    }
+};
+
+
+//get active branches
+const getActiveBranches = async (req, res) => {
+    try {
+        const branches = await Branch.find({ branch_status: 1 }) // filter active only
+            .populate('created_by', 'username email')
+            .populate('updated_by', 'username email');
+
+        const branches_count = await Branch.countDocuments({ branch_status: 1 });
+
+        if (!branches || branches.length === 0) {
+            return notFoundResponse(res, {
+                message: "No active branches found",
+            });
+        }
+
+        return successResponse(res, {
+            message: "Active branches retrieved successfully",
+            records_count: branches_count,
+            data: branches
+        });
+
+    } catch (error) {
+        if (error.isJoi) {
+            return serverErrorResponse(res, {
+                message: error.details[0].message
+            });
+        }
+        // return serverErrorResponse(res, {
+        //     error: error.message
+        // });
+    }
+};
+
+//get inactive branches
+const getInActiveBranches = async (req, res) => {
+    try {
+        const branches = await Branch.find({ branch_status: 0 }) // filter active only
+            .populate('created_by', 'username email')
+            .populate('updated_by', 'username email');
+
+        const branches_count = await Branch.countDocuments({ branch_status: 0 });
+
+        if (!branches || branches.length === 0) {
+            return notFoundResponse(res, {
+                message: "No in active branches found",
+            });
+        }
+
+        return successResponse(res, {
+            message: "InActive branches retrieved successfully",
+            records_count: branches_count,
+            data: branches
+        });
+
+    } catch (error) {
+        if (error.isJoi) {
+            return serverErrorResponse(res, {
+                message: error.details[0].message
+            });
+        }
     }
 };
 
@@ -130,9 +244,15 @@ const getBranchById = async (req, res) => {
         });
 
     } catch (error) {
-        return serverErrorResponse(res, {
-            error: error.message
-        });
+        // return serverErrorResponse(res, {
+        //     error: error.message
+        // });
+
+        if (error.isJoi) {
+            return serverErrorResponse(res, {
+                message: error.details[0].message
+            });
+        }
     }
 };
 
@@ -189,9 +309,14 @@ const updateBranch = async (req, res) => {
             data: branch
         });
     } catch (error) {
-        return serverErrorResponse(res, {
-            error: error.message
-        });
+        // return serverErrorResponse(res, {
+        //     error: error.message
+        // });
+        if (error.isJoi) {
+            return serverErrorResponse(res, {
+                message: error.details[0].message
+            });
+        }
     }
 }
 
@@ -220,15 +345,23 @@ const deleteBranch = async (req, res) => {
         });
 
     } catch (error) {
-        return serverErrorResponse(res, {
-            error: error.message
-        });
+        // return serverErrorResponse(res, {
+        //     error: error.message
+        // });
+
+        if (error.isJoi) {
+            return serverErrorResponse(res, {
+                message: error.details[0].message
+            });
+        }
     }
 };
 
 module.exports = {
     createBranch,
     getAllBranches,
+    getActiveBranches,
+    getInActiveBranches,
     getBranchById,
     updateBranch,
     deleteBranch,

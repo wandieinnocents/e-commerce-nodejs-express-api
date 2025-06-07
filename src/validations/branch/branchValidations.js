@@ -9,7 +9,7 @@ const storeBranchValidation = Joi.object({
     branch_status: Joi.number().integer().optional().messages({
         'number.base': 'Branch status must be a number',
     }),
-    branch_address: Joi.string().trim().optional(),
+    branch_address: Joi.string().trim().allow('').optional(),
     created_by: Joi.number().integer().optional().messages({
         'number.base': 'Created by must be a number',
     }),
@@ -27,7 +27,7 @@ const updateBranchValidation = Joi.object({
     branch_status: Joi.number().integer().optional().messages({
         'number.base': 'Branch status must be a number',
     }),
-    branch_address: Joi.string().trim().optional(),
+    branch_address: Joi.string().trim().allow('').optional(),
     created_by: Joi.number().integer().optional().messages({
         'number.base': 'Created by must be a number',
     }),
