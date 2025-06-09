@@ -120,7 +120,7 @@ const getAllBranches = async (req, res) => {
             .populate('updated_by', 'username email')
             .skip(skip)
             .limit(limit)
-            .sort({ createdAt: -1 });  // Optional: sort by latest
+            .sort({ createdAt: -1 });
 
         // If no branches found
         if (!branches || branches.length === 0) {
@@ -154,9 +154,18 @@ const getAllBranches = async (req, res) => {
 //get active branches
 const getActiveBranches = async (req, res) => {
     try {
+        // Get pagination parameters from query string
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+
         const branches = await Branch.find({ branch_status: 1 }) // filter active only
             .populate('created_by', 'username email')
-            .populate('updated_by', 'username email');
+            .populate('updated_by', 'username email')
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
 
         const branches_count = await Branch.countDocuments({ branch_status: 1 });
 
@@ -168,6 +177,8 @@ const getActiveBranches = async (req, res) => {
 
         return successResponse(res, {
             message: "Active branches retrieved successfully",
+            current_page: page,
+            total_pages: Math.ceil(branches_count / limit),
             records_count: branches_count,
             data: branches
         });
@@ -178,18 +189,26 @@ const getActiveBranches = async (req, res) => {
                 message: error.details[0].message
             });
         }
-        // return serverErrorResponse(res, {
-        //     error: error.message
-        // });
+
     }
 };
 
 //get inactive branches
 const getInActiveBranches = async (req, res) => {
     try {
+
+        // Get pagination parameters from query string
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+
         const branches = await Branch.find({ branch_status: 0 }) // filter active only
             .populate('created_by', 'username email')
-            .populate('updated_by', 'username email');
+            .populate('updated_by', 'username email')
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
 
         const branches_count = await Branch.countDocuments({ branch_status: 0 });
 
@@ -201,6 +220,9 @@ const getInActiveBranches = async (req, res) => {
 
         return successResponse(res, {
             message: "InActive branches retrieved successfully",
+            current_page: page,
+            total_pages: Math.ceil(branches_count / limit),
+            records_count: branches_count,
             records_count: branches_count,
             data: branches
         });
